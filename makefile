@@ -1,20 +1,29 @@
-CC= gcc -Wall
-LIBS = -lm
-INCLUDES = -I .
+SRC_DIR := src
+OBJ_DIR := obj
+BIN_DIR := bin
 
-MAIN= ejecutable
+EXE := $(BIN_DIR)/macaco
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-SRCS = hashchain.c  hashtable.c  main.c
+CPPFLAGS := -Iinclude
+CFLAGS   := -Wall
+LDLIBS   := -lm
 
-DEPS = hashchain.h  hashtable.h
+.PHONY: all clean
 
-OBJS = $(SRCS:.c=.o)
+all: $(EXE)
 
-$(MAIN): $(OBJS)
-	$(CC) -o $(MAIN) $(OBJS) $(LIBS)
-%.o: %.c $(DEPS)
-	$(CC) -c $< $(INCLUDES)
-cleanall: clean
-	rm -f $(MAIN)
+$(EXE): $(OBJ) | $(BIN_DIR)
+	$(CC) $^ $(LDLIBS) -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BIN_DIR) $(OBJ_DIR):
+	mkdir -p $@
+
 clean:
-	rm -f *.o *~ $(MAIN)
+	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
+
+-include $(OBJ:.o=.d)

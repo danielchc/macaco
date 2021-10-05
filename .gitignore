@@ -1,2 +1,4 @@
 *.o
 ejecutable
+bin/
+obj/
