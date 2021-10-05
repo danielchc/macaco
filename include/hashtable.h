@@ -23,14 +23,13 @@ typedef struct hash_table
     record_t** lists;
 }hash_table_t;
 
-hash_table_t* init_hash_table(size_t table_size);
-
+	hash_table_t* init_hash_table(size_t table_size);
 	int resize_table(hash_table_t* hash_table); 
-	record_t* put_record(char* key, uint64_t value, hash_table_t* hash_table);
-	uint64_t get_value(char* key, hash_table_t* hash_table);
-	record_t* remove_record(char* key, hash_table_t* hash_table);
+	record_t* set_value(char* key, uint value, hash_table_t* hash_table);
+	uint get_value(char* key, hash_table_t* hash_table);
+	record_t* remove_value(char* key, hash_table_t* hash_table);
 	int print_table(hash_table_t* hash_table);
-	int clear_table(hash_table_t* hash_table);
-	int del_hash_table(hash_table_t** hash_table);
+	int clear_hash_table(hash_table_t* hash_table);
+	int delete_hash_table(hash_table_t** hash_table);
 
 #endif

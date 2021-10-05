@@ -40,25 +40,16 @@ hash_table_t* init_hash_table(size_t table_size){
     hash_function
         generates an index based on the given key,
         to calculate a valid index use hash_val%table_size
-        
-        this is a version of the Jenkins one-at-a-time hash function
-        
-        note:
-            pass a function pointer as an argument to init_hash_table()
-            to use a customized hash function. (char* keys for now)
-            a function pointer to hash_function is included as the macro
-            DEFAULTHASH in hashtable.h
     param:
         char* key (the key to hash)
     return:
-        uint64_t a positive integer value,
+        uint a positive integer value,
         use to calculate a valid index in an array
 */
-uint64_t hash_function(char* key){
-    uint32_t hash_val = 0;  
+uint hash_function(char* key){
+    uint hash_val = 0;  
     char ch = 1;
-    while((ch = *key++))
-    {
+    while((ch = *key++)){
         hash_val += ch;
         hash_val += (hash_val<<10);
         hash_val ^= (hash_val>>6);
@@ -68,7 +59,7 @@ uint64_t hash_function(char* key){
     hash_val ^= (hash_val>>11);
     hash_val += (hash_val<<15);
 
-    return (uint64_t)hash_val;
+    return (uint)hash_val;
 }
 
 /*
@@ -100,21 +91,19 @@ int resize_table(hash_table_t* hash_table){
 
     if(!larger_table) return -1;
 
-    uint64_t size = hash_table->table_size;
-    uint64_t i = 0;
+    uint size = hash_table->table_size;
+    uint i = 0;
     record_t* current_list = NULL;
     record_t* to_transfer = NULL;
-    uint64_t table_index = 0;
+    uint table_index = 0;
      
     //iterate through each list in the original lists array
-    for(; i < size; ++i)
-    {
+    for(; i < size; ++i){
         //for each record in the current list,
         //remove the record from the old list,
         //rehash the record's key and add the record to the larger list
         current_list = (hash_table->lists)[i];
-        while(current_list)
-        {
+        while(current_list){
             if(!(to_transfer = remove_front(&current_list) ))return -1;
             table_index = hash_function(to_transfer->key)%new_size;
             to_transfer->next_link = larger_table[table_index];
@@ -141,21 +130,20 @@ int resize_table(hash_table_t* hash_table){
             passed as an argument
     param:  
         char* key (key to add)
-        uint64_t value (value to assign or update)
+        uint value (value to assign or update)
         hash_table_t* hash_table (the hash table to search)
     return: 
         upon success, returns a pointer to the newly-created key-value record
         upon error returns NULL
 */
-record_t* put_record(char* key, uint64_t value, hash_table_t* hash_table)
-{
+record_t* set_value(char* key, uint value, hash_table_t* hash_table){
     if(!key || !hash_table)return NULL;
 
     //calculate the hash value using the hash function
     //set for the current hash table, (save value in case of resize)
-    uint64_t hash_val = hash_function(key);
+    uint hash_val = hash_function(key);
     //find the appropriate index in the hash table's lists array
-    uint64_t table_index = hash_val %(hash_table->table_size);
+    uint table_index = hash_val %(hash_table->table_size);
     
     //set a double record pointer to the start of the correct list in
     //the hash table's lists array to begin traversing the list
@@ -187,17 +175,16 @@ record_t* put_record(char* key, uint64_t value, hash_table_t* hash_table)
         //adding it to the front of the appropriate list in the lists array
         record_t* new_record = NULL;
         if(!(new_record = add_front(key, value, &(hash_table->lists[table_index]))))return NULL;
-        {
-            //update the total number of records in the hash table,
-            //return a pointer to the new key-value record
-            hash_table->num_records++;
-            return new_record;
-        }
-    }
-    //if the key already exists in the table,
-    //update its old value (increment the old value by the new value),
-    //return a pointer to the key-value record
-    else{
+        
+        //update the total number of records in the hash table,
+        //return a pointer to the new key-value record
+        hash_table->num_records++;
+        return new_record;
+        
+    }else{
+        //if the key already exists in the table,
+        //update its old value (increment the old value by the new value),
+        //return a pointer to the key-value record
         (*link_ptr)->value += value;
         return *link_ptr;
     }
@@ -216,9 +203,9 @@ record_t* put_record(char* key, uint64_t value, hash_table_t* hash_table)
         if the key does not exist,
             returns -2
 */
-uint64_t get_value(char* key, hash_table_t* hash_table){
+uint get_value(char* key, hash_table_t* hash_table){
     if(!key || !hash_table)return -1;
-    uint64_t table_index = hash_function(key)%(hash_table->table_size);
+    uint table_index = hash_function(key)%(hash_table->table_size);
     record_t* link = hash_table->lists[table_index];
 	
     while(link && strcmp(key, ((link)->key)) != 0){
@@ -241,11 +228,11 @@ uint64_t get_value(char* key, hash_table_t* hash_table){
             (remember to free when no longer in use)
         upon error returns NULL
 */
-record_t* remove_record(char* key, hash_table_t* hash_table)
-{
+record_t* remove_value(char* key, hash_table_t* hash_table){
+
     if(!key || !hash_table || !(hash_table->lists) )return NULL;
 
-    uint64_t table_index = hash_function(key)%(hash_table->table_size);
+    uint table_index = hash_function(key)%(hash_table->table_size);
     record_t** link_ptr = &(hash_table->lists[table_index]);
    
     while(*link_ptr && strcmp(key, ((*link_ptr)->key)) != 0){
@@ -274,17 +261,17 @@ record_t* remove_record(char* key, hash_table_t* hash_table)
 int print_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
     
-    uint64_t i = 0;
+    uint i = 0;
     size_t size = hash_table->table_size;
     for(; i < size; ++i)
     {
         //display each list within brackets
-        printf("%s %" PRIu64 "\n", "list index", i);
+        printf("%s %u\n", "list index", i);
         printf("%s", "{ ");
         if(hash_table->lists[i]){
 			record_t* head=hash_table->lists[i];
 			while(head){   
-				printf("[KEY: %s, VALUE: %" PRIu64 "]", head->key, head->value);
+				printf("[KEY: %s, VALUE: %u]", head->key, head->value);
 				head = head->next_link; 
 			}
         }
@@ -302,16 +289,16 @@ int print_table(hash_table_t* hash_table){
     return:
         void
 */
-int clear_table(hash_table_t* hash_table)
-{
+int clear_hash_table(hash_table_t* hash_table){
+
     if(!hash_table || !(hash_table->lists))return -1;
     
     //for each list in the hashtable's lists array,
     //free the list
-    uint64_t size = hash_table->table_size;
-    uint64_t i = 0;
+    uint size = hash_table->table_size;
+    uint i = 0;
     for(; i < size; ++i){
-        del_list(&(hash_table->lists[i]));
+        delete_list(&(hash_table->lists[i]));
     }
     //free the memory allocated for the now-cleared table
     free(hash_table->lists);
@@ -328,10 +315,9 @@ int clear_table(hash_table_t* hash_table)
     return:
         void
 */
-int del_hash_table(hash_table_t** hash_table)
-{
+int delete_hash_table(hash_table_t** hash_table){
     if(!hash_table || !(*hash_table)) return -1;
-    clear_table(*hash_table);
+    clear_hash_table(*hash_table);
     free(*hash_table);
     *hash_table = NULL;
 
