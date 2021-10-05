@@ -76,7 +76,7 @@ uint hash_function(char* key){
         upon success, 0
         otherwise -1
 */
-int resize_table(hash_table_t* hash_table){
+int resize_hash_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
 
     //calculate new size for lists array 
@@ -164,7 +164,7 @@ record_t* set_value(char* key, uint value, hash_table_t* hash_table){
         //if so, resize table, rehash record keys and place them in the larger table,
         //then proceed to hash the new record, then place it in the appropriate list in the larger table
         if((hash_table->num_records + 1) > (hash_table->table_size)*(DEFAULTMAXLOAD)){
-            if((resize_table(hash_table) != 0))return NULL;
+            if((resize_hash_table(hash_table) != 0))return NULL;
 
             //now that the table should have been resized,
             //find the correct index for the new record based on the new size
@@ -250,7 +250,7 @@ record_t* remove_value(char* key, hash_table_t* hash_table){
 }
 
 /*
-    print_table
+    print_hash_table
         displays the hash table as a list of bracketed lists
     param:  
         hash_table_t* hash_table (the hash table to display)
@@ -258,13 +258,12 @@ record_t* remove_value(char* key, hash_table_t* hash_table){
         upon success returns 0 
         if nothing to print, returns -1
 */
-int print_table(hash_table_t* hash_table){
+int print_hash_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
     
     uint i = 0;
     size_t size = hash_table->table_size;
-    for(; i < size; ++i)
-    {
+    for(; i < size; ++i){
         //display each list within brackets
         printf("%s %u\n", "list index", i);
         printf("%s", "{ ");
@@ -282,7 +281,7 @@ int print_table(hash_table_t* hash_table){
 }
 
 /*
-    clear_table
+    clear_hash_table
         frees the memory allocated for the lists array in the hash table
     param:  
         hash_table_t* hash_table (the hash table whose lists array must be freed)

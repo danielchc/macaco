@@ -19,8 +19,7 @@ int main(int argc, char* argv[]){
     uint word_count = 1;
     char buffer[51];
     //read each line
-    while(fgets(buffer, 51, text))
-    {
+    while(fgets(buffer, 51, text)){
         //replace the \n new line character with a c string null terminator 
         if(buffer[0] && buffer[strlen(buffer)-1] == '\n')
         {
@@ -58,9 +57,8 @@ int main(int argc, char* argv[]){
 
     //passing a single command line argument of 'x'
     //avoids displaying the table
-    if(argc != 2 || argv[1][0] != 'x')
-    {
-        print_table(hash_table);
+    if(argc != 2 || argv[1][0] != 'x'){
+        print_hash_table(hash_table);
     }
     printf("TOCOU %u",get_value("abashed",hash_table));
 
