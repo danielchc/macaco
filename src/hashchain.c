@@ -12,7 +12,7 @@
         upon success, a pointer to the new record
         otherwise NULL
 */
-record_t* add_front(char* key, uint value, record_t** head){
+record_t* add_front(char* key, value_t value, record_t** head){
     if(!head)return NULL;
     
     //allocate memory for the new record

@@ -84,7 +84,7 @@ int resize_hash_table(hash_table_t* hash_table){
     //possibly by providing a pre-built array of prime numbers)
 	
 	//Escoller números primos
-    size_t new_size = (hash_table->table_size << 1) + 1;
+    uint new_size = (hash_table->table_size << 1) + 1;
     
     //allocate memory for the new lists array
     record_t** larger_table = (record_t**)calloc(new_size, sizeof(record_t*));
@@ -136,7 +136,7 @@ int resize_hash_table(hash_table_t* hash_table){
         upon success, returns a pointer to the newly-created key-value record
         upon error returns NULL
 */
-record_t* set_value(char* key, uint value, hash_table_t* hash_table){
+record_t* set_value(char* key, value_t value, hash_table_t* hash_table){
     if(!key || !hash_table)return NULL;
 
     //calculate the hash value using the hash function
@@ -191,6 +191,29 @@ record_t* set_value(char* key, uint value, hash_table_t* hash_table){
 }
 
 /*
+    key_exist
+
+    param:  
+        char* key (key to locate)
+        hash_table_t* hash_table (the hash table to search)
+    return: 
+        if the key exists return 0
+        if the hashtable not exists error returns -2
+        if the key does not exist returns -1
+*/
+
+
+int key_exist(char* key, hash_table_t* hash_table){
+    if(!key || !hash_table) return -2;
+    uint table_index = hash_function(key)%(hash_table->table_size);
+    record_t* link = hash_table->lists[table_index];
+    while(link && strcmp(key, ((link)->key)) != 0)link = link->next_link;
+    if(!link)return -1;
+    return 0;
+}
+
+
+/*
     get_value
 
     param:  
@@ -203,16 +226,18 @@ record_t* set_value(char* key, uint value, hash_table_t* hash_table){
         if the key does not exist,
             returns -2
 */
-uint get_value(char* key, hash_table_t* hash_table){
-    if(!key || !hash_table)return -1;
+value_t* get_value(char* key, hash_table_t* hash_table){
+    if(!key || !hash_table) return NULL;
     uint table_index = hash_function(key)%(hash_table->table_size);
     record_t* link = hash_table->lists[table_index];
 	
     while(link && strcmp(key, ((link)->key)) != 0){
         link = link->next_link;
     }
-    if(!link)return -2;
-    return link->value;
+    if(!link) return NULL;
+    value_t* value=malloc(sizeof(value_t));
+    (*value)=link->value;
+    return value;
 }
 
 /*

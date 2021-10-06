@@ -15,5 +15,9 @@ void print_ts(ts_s ts){
 }
 
 int delete_ts(ts_s* ts){
-    delete_hash_table(ts);
+    return delete_hash_table(ts);
+}
+
+int find_lexcomp(ts_s ts,char* lexcomp){
+    return get_value(lexcomp,ts);
 }
