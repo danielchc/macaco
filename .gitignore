@@ -3,3 +3,4 @@ ejecutable
 bin/
 obj/
 words.txt
+.vscode/

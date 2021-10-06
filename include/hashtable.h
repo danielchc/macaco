@@ -16,8 +16,7 @@
 #endif
 
 
-typedef struct hash_table
-{
+typedef struct hash_table{
     size_t     table_size;
     size_t     num_records;
     record_t** lists;
