@@ -10,7 +10,7 @@ int main(int argc, char* argv[]){
     ts_s k;
     init_ts(&k);
 	load_keywords(&k);
-	print_ts(k);
+	//print_ts(k);
     //printf("%p\n",k);
     delete_ts(&k);
 	return 0;

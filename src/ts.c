@@ -48,7 +48,6 @@ void load_keywords(ts_s* ts){
     uint i;
     keyword current;
     for(i=0;i<sizeof(keywords)/sizeof(keyword);i++){
-        printf("%d",i);
         current=keywords[i];
         set_value(current.keyword,current.value,(*ts));
     } 
