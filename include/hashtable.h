@@ -14,6 +14,7 @@
 #include "hashchain.h"
 #endif
 
+typedef unsigned int ht_size;
 
 typedef struct hash_table{
     size_t     table_size;

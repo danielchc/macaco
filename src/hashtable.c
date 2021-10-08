@@ -2,23 +2,23 @@
 
 
 
-int is_prime(uint number) {
+int is_prime(ht_size number) {
 	if (number <= 3 && number > 1){
 		return 1;
 	}else if (number%2==0 || number%3==0){
 		return 0;
 	}else{
-		uint i;
+		ht_size i;
 		for (i=5; i*i<=number; i+=6) {
-			if (number % i == 0 || number%(i + 2) == 0)
+			if ((number % i == 0) || (number%(i + 2) == 0))
 				return 0;
 		}
 	}
 	return 1; 
 }
 
-uint get_next_prime(uint n){
-	uint i;
+ht_size get_next_prime(ht_size n){
+	ht_size i;
     for (i = n; i < 2 * n; ++i){
 		if(is_prime(i))return i;
 	}
@@ -69,11 +69,11 @@ hash_table_t* init_hash_table(size_t table_size){
     param:
         char* key (the key to hash)
     return:
-        uint a positive integer value,
+        ht_size a positive integer value,
         use to calculate a valid index in an array
 */
-uint hash_function(char* key){
-    uint hash_val = 0;  
+ht_size hash_function(char* key){
+    ht_size hash_val = 0;  
     char ch = 1;
     while((ch = *key++)){
         hash_val += ch;
@@ -85,7 +85,7 @@ uint hash_function(char* key){
     hash_val ^= (hash_val>>11);
     hash_val += (hash_val<<15);
 
-    return (uint)hash_val;
+    return (ht_size)hash_val;
 }
 
 /*
@@ -104,18 +104,18 @@ uint hash_function(char* key){
 */
 int resize_hash_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
-    uint new_size = get_next_prime((hash_table->table_size << 1));
+    ht_size new_size = get_next_prime((hash_table->table_size << 1));
     
     //allocate memory for the new lists array
     record_t** larger_table = (record_t**)calloc(new_size, sizeof(record_t*));
 
     if(!larger_table) return -1;
 
-    uint size = hash_table->table_size;
-    uint i = 0;
+    ht_size size = hash_table->table_size;
+    ht_size i = 0;
     record_t* current_list = NULL;
     record_t* to_transfer = NULL;
-    uint table_index = 0;
+    ht_size table_index = 0;
      
     //iterate through each list in the original lists array
     for(; i < size; ++i){
@@ -150,7 +150,7 @@ int resize_hash_table(hash_table_t* hash_table){
             passed as an argument
     param:  
         char* key (key to add)
-        uint value (value to assign or update)
+        ht_size value (value to assign or update)
         hash_table_t* hash_table (the hash table to search)
     return: 
         upon success, returns a pointer to the newly-created key-value record
@@ -161,9 +161,9 @@ record_t* set_value(char* key, value_t value, hash_table_t* hash_table){
 
     //calculate the hash value using the hash function
     //set for the current hash table, (save value in case of resize)
-    uint hash_val = hash_function(key);
+    ht_size hash_val = hash_function(key);
     //find the appropriate index in the hash table's lists array
-    uint table_index = hash_val %(hash_table->table_size);
+    ht_size table_index = hash_val %(hash_table->table_size);
     
     //set a double record pointer to the start of the correct list in
     //the hash table's lists array to begin traversing the list
@@ -225,7 +225,7 @@ record_t* set_value(char* key, value_t value, hash_table_t* hash_table){
 
 int key_exist(char* key, hash_table_t* hash_table){
     if(!key || !hash_table) return -2;
-    uint table_index = hash_function(key)%(hash_table->table_size);
+    ht_size table_index = hash_function(key)%(hash_table->table_size);
     record_t* link = hash_table->lists[table_index];
     while(link && strcmp(key, ((link)->key)) != 0)link = link->next_link;
     if(!link)return -1;
@@ -248,7 +248,7 @@ int key_exist(char* key, hash_table_t* hash_table){
 */
 value_t* get_value(char* key, hash_table_t* hash_table){
     if(!key || !hash_table) return NULL;
-    uint table_index = hash_function(key)%(hash_table->table_size);
+    ht_size table_index = hash_function(key)%(hash_table->table_size);
     record_t* link = hash_table->lists[table_index];
 	
     while(link && strcmp(key, ((link)->key)) != 0){
@@ -277,7 +277,7 @@ record_t* remove_value(char* key, hash_table_t* hash_table){
 
     if(!key || !hash_table || !(hash_table->lists) )return NULL;
 
-    uint table_index = hash_function(key)%(hash_table->table_size);
+    ht_size table_index = hash_function(key)%(hash_table->table_size);
     record_t** link_ptr = &(hash_table->lists[table_index]);
    
     while(*link_ptr && strcmp(key, ((*link_ptr)->key)) != 0){
@@ -306,12 +306,11 @@ record_t* remove_value(char* key, hash_table_t* hash_table){
 int print_hash_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
     
-    uint i = 0;
+    ht_size i = 0;
     size_t size = hash_table->table_size;
     for(; i < size; ++i){
-        //display each list within brackets
-        printf("%s %u\n", "list index", i);
-        printf("%s", "{ ");
+        printf("INDEX %u:", i);
+        printf("{");
         if(hash_table->lists[i]){
 			record_t* head=hash_table->lists[i];
 			while(head){   
@@ -319,7 +318,7 @@ int print_hash_table(hash_table_t* hash_table){
 				head = head->next_link; 
 			}
         }
-        printf("%s\n", " }");
+        printf("%s\n", "}");
     }
 
     return 0;
@@ -339,8 +338,8 @@ int clear_hash_table(hash_table_t* hash_table){
     
     //for each list in the hashtable's lists array,
     //free the list
-    uint size = hash_table->table_size;
-    uint i = 0;
+    ht_size size = hash_table->table_size;
+    ht_size i = 0;
     for(; i < size; ++i){
         delete_list(&(hash_table->lists[i]));
     }
