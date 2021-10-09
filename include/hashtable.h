@@ -19,9 +19,9 @@ typedef unsigned int ht_size_t;
 
 //Estructura de tabla hash
 typedef struct hash_table{
-    size_t     table_size;
-    size_t     num_records;
-    record_t** lists;
+	size_t     table_size;
+	size_t     num_records;
+	record_t** lists;
 }hash_table_t;
 
 hash_table_t* init_hash_table(ht_size_t table_size);

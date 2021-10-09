@@ -6,8 +6,8 @@
 #define KEYWORDSIZE 12
 
 typedef struct{
-    char	keyword[KEYWORDSIZE];
-    uint   	value;
+	char	keyword[KEYWORDSIZE];
+	uint   	value;
 }keyword;
 
 //Palabras clave
