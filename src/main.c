@@ -9,36 +9,38 @@
 int main(int argc, char* argv[]){
 	ts_s k;
 
-	load_file("wilcoxon.py");
+	load_file("test.txt");
 	char c;
 	int x=0;
 	while((c=next_char())!=EOF){
 		printf("%c",c);
 		x++;
-		if(x==100)break;
+		if(x==10)break;
 	}
 	printf("\n---------------------\n");
 	
 	c=previous_char();
 	printf("%c\n",c);
 	c=previous_char();
+	printf("%c\n\n",c);
+	c=next_char();
 	printf("%c\n",c);
-	c=previous_char();
+	c=next_char();
 	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
-	c=previous_char();
-	printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
+	// c=previous_char();
+	// printf("%c\n",c);
 
 	//init_ts(&k);
 	//load_keywords(&k);
