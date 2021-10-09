@@ -8,7 +8,7 @@
 typedef struct{
 	char	keyword[KEYWORDSIZE];
 	uint   	value;
-}keyword;
+}lexcomp_t;
 
 //Palabras clave
 #define _FALSE 	    	301

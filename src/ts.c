@@ -1,5 +1,5 @@
 #include "ts.h"
-keyword keywords[]={
+lexcomp_t keywords[]={
 	{"False",_FALSE},
 	{"await",_AWAIT},
 	{"else",_ELSE},
@@ -43,7 +43,7 @@ int init_ts(ts_s* ts){
 
 void load_keywords(ts_s* ts){
 	uint i;
-	for(i=0;i<sizeof(keywords)/sizeof(keyword);i++){
+	for(i=0;i<sizeof(keywords)/sizeof(lexcomp_t);i++){
 		set_value(keywords[i].keyword,keywords[i].value,(*ts));}
 	}
 
