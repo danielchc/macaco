@@ -54,4 +54,6 @@ int delete_ts(ts_s* ts){
     return delete_hash_table(ts);}
 
 int find_lexcomp(ts_s ts,char* lexcomp){
-    return get_value(lexcomp,ts);}
+    int value;
+    return get_value(lexcomp,ts,&value);
+}
