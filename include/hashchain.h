@@ -1,18 +1,13 @@
 #ifndef HASHCHAIN_H
 #define HASHCHAIN_H
 
-#ifndef HASHTABLE_H
-
-#include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
 #include <string.h>
 
-#endif
+//Tipo de datos almacenado na táboa hash
+typedef unsigned int ht_value_t;
 
-typedef int ht_value_t;
-
-
+//Estructura de datos almacenado na táboa hash(lista enlazada)
 typedef struct record{
     ht_value_t value;
     struct record* next_link;

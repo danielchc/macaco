@@ -2,6 +2,7 @@
 #define DEFINITIONS
 #include <stdlib.h>
 
+//Tamaño reservado de palabra clave
 #define KEYWORDSIZE 12
 
 typedef struct{
@@ -9,7 +10,7 @@ typedef struct{
     uint   	value;
 }keyword;
 
-//Keywords
+//Palabras clave
 #define _FALSE 	    	301
 #define _AWAIT 	    	302
 #define _ELSE        	303

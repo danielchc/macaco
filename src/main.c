@@ -14,13 +14,6 @@ int main(int argc, char* argv[]){
     //printf("%p\n",k);
     delete_ts(&k);
 	return 0;
-	FILE *file = fopen("wilcoxon.py", "r");
-	char current='\0';
-	do{
-		current = (char)fgetc(file);
-		if(current=='\n') continue;
-		printf("%c\n",current);
-	}while(current != EOF);
 	
 	
     return 0;

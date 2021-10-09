@@ -2,77 +2,72 @@
 
 /*
     add_front
-        creates a new key-value record (char* and uint)
-        and adds it to the front of the given list list head
+        crea un novo rexistro o principio dunha lista enlazada
     param:
-        char* key (the search key for the record)
-        uint value (the value to assign to the search key)
-        record_t** (a pointer to the head pointer to a linked-list chain)
+        char* key: chave onde gardar o valor
+        uint value: valor a gardar
+        record_t** head: punteiro a cabeza da lista
     return:
-        upon success, a pointer to the new record
+        devolve o punteiro o novo rexistro
         otherwise NULL
 */
 record_t* add_front(char* key, ht_value_t value, record_t** head){
     if(!head)return NULL;
     
-    //allocate memory for the new record
+    //Garda memoria para o novo rexistro
     record_t* new_record = (record_t*)malloc(sizeof(record_t));
     
     if(!new_record)return NULL;
 
-    //set the key and value for the new record
-
-    //allocate memory for the key
+    //Garda memoria para a clave
+	
     char* key_copy = strdup(key);
     if(!key_copy)return NULL;
     
     new_record->key = key_copy;
     new_record->value = value;
-    //set the new record as the new front of the linked-list chain
+    //establece o novo rexistro como cabeza de lista
     new_record->next_link= *head;
     *head = new_record;
     
-    //return a pointer to the new record
+    //devolve o punteiro o novo rexistro
     return new_record;
 }
 
 /*
     remove_front
-        removes the record at the front of the given linked-list chain
+        elimina a cabeza da lista dada unha lista enlazada
     param:
-        record_t** (a pointer to the head pointer to a linked-list chain)
+        record_t** head: punteiro a cabeza da lista
     return:
-        upon success, a pointer to the record just removed from the linked-list
-        (remember to free the pointer to the key and the pointer to the record)
-        otherwise NULL
+		devolve o punteiro da cabeza da lista
 */
 record_t* remove_front(record_t** head){
+	//Se non existe a lista devolve null
     if(!head || !(*head))return NULL;
 
-    //save a pointer to the current front of the list
+    //garda o punteiro de inicio de lista
     record_t* to_remove = *head;
-    //repoint the head of the linked-list chain to the
-    //second record in the list, which becomes the front 
+    //move o inicio o seguinte
     *head = (*head)->next_link;
 
-    //unlink the record-to-remove from the list
+    //elimina o punteiro a seguinte
     to_remove->next_link = NULL;
 
-    //return the removed record
+    //devolve un punteiro o rexistro eliminado
     return to_remove;
 }
 
 /*
     delete_list
-        frees the memory allocated for the given linked-list chain
+        borra a lista
     param:  
-        record_t** head (a pointer to the head pointer to the linked-list chain to free)
+        record_t** head: punteiro a cabeza da lista
     return:
         void
 */
 void delete_list(record_t** head){
-    //iterate through the linked-list
-    //and free and unlink each of its records in sequence
+    //recorre a lista e borra os seus elementos
     record_t* to_free;
     while(head && (*head)){
         to_free = *head;

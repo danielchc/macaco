@@ -1,6 +1,15 @@
 #include "hashtable.h"
 
 
+/*
+    is_prime
+		comproba se un número e primo
+    param:  
+        ht_size_t number: número a comprobar
+    return: 
+		se é primo devolve 1
+		se non é primo devolve 0
+*/
 
 int is_prime(ht_size_t number) {
 	if (number <= 3 && number > 1){
@@ -17,6 +26,14 @@ int is_prime(ht_size_t number) {
 	return 1; 
 }
 
+/*
+    get_next_prime
+		obten o seguinte numero primo
+    param:  
+        ht_size_t n: número co que calcular o próximo primo
+    return: 
+		devolve o próximo primo
+*/
 ht_size_t get_next_prime(ht_size_t n){
 	ht_size_t i;
     for (i = n; i < 2 * n; ++i){
@@ -28,49 +45,41 @@ ht_size_t get_next_prime(ht_size_t n){
 
 /*
     init_hash_table
-        allocates memory and returns a pointer to a new hash_table_t structure
+		asigna memoria e devolve un punteiro a unha nova estrutura hash_table_t
     param:  
-        size_t table_size (the desired table size)
-        double load_threshold (the maximum load factor for the new hash table)
-            if during a put_record() operation
-            the load factor is exceeded,
-            an attempt is made to resize the table
-        hash_table_t* hash_table (the hash table to search)
+        size_t table_size: tamaño da táboa
     return: 
-        upon success returns a hash_table_t pointer to the new hash table
-        upon error returns NULL
+		se non hai erro devolve un punteiro hash_table a nova táboa
+        se hai un erro devolve NULL
 */
-hash_table_t* init_hash_table(size_t table_size){
+hash_table_t* init_hash_table(ht_size_t table_size){
     if(table_size == 0)return NULL;
     
-    //allocate memory for the hash table
+    //reservo memoria para a hash_table
     hash_table_t* hash_table_new = (hash_table_t*)malloc(sizeof(hash_table_t));
     
     if(!hash_table_new)return NULL;
 
-    //allocate memory for the array of record lists
+    //reservo memoria para as listas enlazadas
     hash_table_new->lists = (record_t**)calloc(table_size, sizeof(record_t*));
 
     if(!(hash_table_new->lists))return NULL;
 
-    //set the initial table size
+    //establezco o tamaño inicial da táboa
     hash_table_new->table_size = table_size;
-    //set the initial number of records to 0
     hash_table_new->num_records = 0;
 	
-    //return the new hash table    
+    //devolvo a nova táboa    
     return hash_table_new; 
 }
 
 /*
     hash_function
-        generates an index based on the given key,
-        to calculate a valid index use hash_val%table_size
+        xera un índice baseado na clave dada para calcular o indice empregase (hash_val% table_size)
     param:
-        char* key (the key to hash)
+        char* key chave da que queremos xerar o hash
     return:
-        ht_size a positive integer value,
-        use to calculate a valid index in an array
+        ht_size_t devolve un número que corresponde o hash da key
 */
 ht_size_t hash_function(char* key){
     ht_size_t hash_val = 0;  
@@ -84,29 +93,25 @@ ht_size_t hash_function(char* key){
     hash_val += (hash_val<<3);
     hash_val ^= (hash_val>>11);
     hash_val += (hash_val<<15);
-
+	
     return (ht_size_t)hash_val;
 }
 
 /*
     resize_table
-        creates a new lists array that is 
-        twice the size of the one in the given hash table,
-        rehashes the records from the original lists array and transfers
-        them to the new larger lists array,and transfers the records from the original hash table to the new one,
-        the new lists array replaces the old one in the given hash table,
-        the old array is freed
+        crea unha nova matriz de listas e calcula o novo tamaño obtendo o primo máis cercano o doble do tamaño actual
+		reubicanse os rexistros da táboa hash orixinal á nova
     param:
-        hash_table_t* hash_table (the hash table to replace)
+        hash_table_t* hash_table
     return:
-        upon success, 0
-        otherwise -1
+        se non hai erro 0
+		se hai erro -1
 */
 int resize_hash_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
     ht_size_t new_size = get_next_prime((hash_table->table_size << 1));
     
-    //allocate memory for the new lists array
+    //reservo a nova memoria
     record_t** larger_table = (record_t**)calloc(new_size, sizeof(record_t*));
 
     if(!larger_table) return -1;
@@ -115,25 +120,25 @@ int resize_hash_table(hash_table_t* hash_table){
     ht_size_t i = 0;
     record_t* current_list = NULL;
     record_t* to_transfer = NULL;
+	record_t* current = NULL;
     ht_size_t table_index = 0;
      
-    //iterate through each list in the original lists array
+    //recorro a táboa orixinal
     for(; i < size; ++i){
-        //for each record in the current list,
-        //remove the record from the old list,
-        //rehash the record's key and add the record to the larger list
+        //movo os rexistros dunha táboa a outra
         current_list = (hash_table->lists)[i];
         while(current_list){
-            if(!(to_transfer = remove_front(&current_list) ))return -1;
+			current=remove_front(&current_list);
+            if(!(to_transfer = current ))return -1;
             table_index = hash_function(to_transfer->key)%new_size;
             to_transfer->next_link = larger_table[table_index];
             larger_table[table_index] = to_transfer;
         }
     }
-    //free the old list
+    //libero a nova táboa
     free(hash_table->lists);
-    //set the lists array in the given hash table
-    //as the new larger list containing the records 
+    
+	//Establezco os novos tamaños do array
     hash_table->lists = larger_table;
     hash_table->table_size = new_size;
 
@@ -142,70 +147,57 @@ int resize_hash_table(hash_table_t* hash_table){
 
 /*
     put_record
-        given a key and its non-negative value,
-        if the key does not yet exist in the hash table,
-            adds a key-value record,
-        if the key already exists in the hash table,
-            increments the value associated with the key by the value
-            passed as an argument
+		garda unha clave,
+		se a clave aínda non existe na táboa hash engade un rexistro de valor clave,
+		se a clave xa existe na táboa hash cambia o valor asociado á clave polo valor
     param:  
-        char* key (key to add)
-        ht_size value (value to assign or update)
-        hash_table_t* hash_table (the hash table to search)
+        char* key: clave a engadir
+        ht_size value: valor a engadir ou actualizar
+        hash_table_t* hash_table: táboa hash destino
     return: 
-        upon success, returns a pointer to the newly-created key-value record
-        upon error returns NULL
+        se todo vai ben, devolve un punteiro a rexistro creado/actualizado
+        se hai erro devolve NULL
 */
 record_t* set_value(char* key, ht_value_t value, hash_table_t* hash_table){
     if(!key || !hash_table)return NULL;
 
-    //calculate the hash value using the hash function
-    //set for the current hash table, (save value in case of resize)
+    //Calcula o hash da clave
     ht_size_t hash_val = hash_function(key);
-    //find the appropriate index in the hash table's lists array
+	
+	
+    //Busca a ubicación na táboa
     ht_size_t table_index = hash_val %(hash_table->table_size);
     
-    //set a double record pointer to the start of the correct list in
-    //the hash table's lists array to begin traversing the list
+    //Busca o punteiro da lista
     record_t** link_ptr = &(hash_table->lists[table_index]);
     
-    //traverse the list until the chosen key is encountered or
-    //the end of the list is reached
+    //Recorre a lista ata atopar a clave
     while(*link_ptr && strcmp(key, ((*link_ptr)->key)) != 0){
-        //repoint the double pointer record to the next record pointer
+        //vai buscando nos punteiros da lista enlazada
         link_ptr = &(*link_ptr)->next_link;
     }
 
-    //if the record does not exist,
-    //add a new key-value record to the current list,
-    //return a pointer to the key-value new record
+    //se non existe engade un novo reixstro
     if(!(*link_ptr)){
-        //check whether load factor threshold will be exceeded after the next record is added
-        //if so, resize table, rehash record keys and place them in the larger table,
-        //then proceed to hash the new record, then place it in the appropriate list in the larger table
+		//Comproba se é necesario facer máis grande a táboa
         if((hash_table->num_records + 1) > (hash_table->table_size)*(DEFAULTMAXLOAD)){
+			//Se é necesario faise máis grande
             if((resize_hash_table(hash_table) != 0))return NULL;
-
-            //now that the table should have been resized,
-            //find the correct index for the new record based on the new size
+			//Calcula o novo hash
             table_index = hash_val%(hash_table->table_size);
         }
 
-        //add the new record to the hash table by
-        //adding it to the front of the appropriate list in the lists array
+        //engade o novo rexistro a lista enlazada
         record_t* new_record = NULL;
         if(!(new_record = add_front(key, value, &(hash_table->lists[table_index]))))return NULL;
         
-        //update the total number of records in the hash table,
-        //return a pointer to the new key-value record
+        //Actualiza o número de items e devolve o novo rexistro
         hash_table->num_records++;
         return new_record;
         
     }else{
-        //if the key already exists in the table,
-        //update its old value (increment the old value by the new value),
-        //return a pointer to the key-value record
-        (*link_ptr)->value += value;
+        //se xa existe a clave reemplaza o valor
+        (*link_ptr)->value = value;
         return *link_ptr;
     }
 }
@@ -214,14 +206,18 @@ record_t* set_value(char* key, ht_value_t value, hash_table_t* hash_table){
     get_value
 
     param:  
-        char* key (key to locate)
-        hash_table_t* hash_table (the hash table to search)
+        char* key: clave a buscar
+        hash_table_t* hash_table: táboa na que buscar
+		ht_value_t* value:
+			se atopa a clave o valor do rexistro
+			se non atopa a clave devolve NULL
     return: 
-        if the key exists, returns 0
-        if the key does not exist returns -1
-        if hashtable not exists error returns -2
+        se a clave existe devolve 0
+        se a clave non existe -1
+        se a hashtable non existe -2
 */
 int get_value(char* key, hash_table_t* hash_table,ht_value_t* value){
+	//Se non existe a táboa da err
     if(!key || !hash_table) return -2;
     ht_size_t table_index = hash_function(key)%(hash_table->table_size);
     record_t* link = hash_table->lists[table_index];
@@ -236,46 +232,49 @@ int get_value(char* key, hash_table_t* hash_table,ht_value_t* value){
 
 /*
     remove_record
-        given a key, removes a record from the hash table
+        dada unha clave, elimina un rexistro da táboa de hash
     param:  
-        char* key (key to remove)
-        hash_table_t* hash_table (the hash table to search)
-    return: 
-        if the key-value record exists,
-            removes the record from the hash table,
-            returns a pointer to the removed record
-            (remember to free when no longer in use)
-        upon error returns NULL
+        char* key: clave a borrar
+        hash_table_t* hash_table: taboa na que borrar o valor
+	return: 
+        se a clave existe devolve 0
+        se a clave non existe -1
+        se a hashtable non existe -2
 */
-record_t* remove_value(char* key, hash_table_t* hash_table){
+int remove_value(char* key, hash_table_t* hash_table){
+	//Se non existe a táboa hash devolve -2
+    if(!key || !hash_table || !(hash_table->lists) )return -2;
 
-    if(!key || !hash_table || !(hash_table->lists) )return NULL;
-
+	//Obten o hash e a posición na táboa
     ht_size_t table_index = hash_function(key)%(hash_table->table_size);
     record_t** link_ptr = &(hash_table->lists[table_index]);
    
+	//Busca o rexistro
     while(*link_ptr && strcmp(key, ((*link_ptr)->key)) != 0){
         link_ptr = &(*link_ptr)->next_link;
     }
-
-    if(!(*link_ptr))return NULL;
+	
+	//Se non atopa o rexistro devolve -1
+    if(!(*link_ptr))return -1;
    
+	//Se existe o rexistro borrao e libera memoria
     record_t* to_remove = *link_ptr;
     *link_ptr = to_remove->next_link;
     
     to_remove->next_link = NULL;
     hash_table->num_records--;
-    return to_remove;
+    free(to_remove);
+	return 0;
 }
 
 /*
     print_hash_table
-        displays the hash table as a list of bracketed lists
+		mostra a táboa de hash
     param:  
-        hash_table_t* hash_table (the hash table to display)
+        hash_table_t* hash_table táboa a mostrar
     return:
-        upon success returns 0 
-        if nothing to print, returns -1
+        devolve 0 se todo vai ben
+		devolve -1 se non hai nada que mostrar
 */
 int print_hash_table(hash_table_t* hash_table){
     if(!hash_table || !(hash_table->lists))return -1;
@@ -300,9 +299,9 @@ int print_hash_table(hash_table_t* hash_table){
 
 /*
     clear_hash_table
-        frees the memory allocated for the lists array in the hash table
+        borra as listas da matriz
     param:  
-        hash_table_t* hash_table (the hash table whose lists array must be freed)
+        hash_table_t* hash_table táboa a borrar
     return:
         void
 */
@@ -310,14 +309,13 @@ int clear_hash_table(hash_table_t* hash_table){
 
     if(!hash_table || !(hash_table->lists))return -1;
     
-    //for each list in the hashtable's lists array,
-    //free the list
+    //para cada elemento borra a lista asociada
     ht_size_t size = hash_table->table_size;
     ht_size_t i = 0;
     for(; i < size; ++i){
         delete_list(&(hash_table->lists[i]));
     }
-    //free the memory allocated for the now-cleared table
+    //elimina a memoria das listas
     free(hash_table->lists);
     hash_table->lists = NULL;
 
@@ -326,11 +324,12 @@ int clear_hash_table(hash_table_t* hash_table){
 
 /*
     del_hash_table
-        frees the memory allocated for the hash table
+        elimina completamente a hash_table
     param:  
-        hash_table_t** hash_table (a pointer to the hash table to free)
+        hash_table_t** hash_table punteiro a táboa a borrar
     return:
-        void
+        se da erro -1
+		se non da erro 0
 */
 int delete_hash_table(hash_table_t** hash_table){
     if(!hash_table || !(*hash_table)) return -1;
