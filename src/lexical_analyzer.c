@@ -109,10 +109,11 @@ typedef enum{
 	QAT_UNK,
 	QAT_SIMPLE_QUOTE,
 	QAT_DOUBLE_QUOTE,
-	QAT_CONTENT
+	QAT_CONTENT,
+	QAT_TEMP
 }_quotes_at_st;
 
-void _quotes_at(lexcomp_t* lexcomp){
+int _quotes_at(lexcomp_t* lexcomp){
 	previous_char();
 	int double_quote=0;
 	int end=0;
@@ -135,16 +136,25 @@ void _quotes_at(lexcomp_t* lexcomp){
 				break;
 			case QAT_DOUBLE_QUOTE:
 				if(c=='\"') double_quote++;
-				else state=QAT_CONTENT;
+				else {
+					if(double_quote==2)	state=QAT_TEMP;
+					else state=QAT_CONTENT;
+				}
 				break;
 			case QAT_CONTENT:
 				if(c=='\"') double_quote--;
-				if(double_quote==0)end=1;
+				if(double_quote==0) end=1;
+				break;
+			case QAT_TEMP:
+				if(c!='\"') end=1;
 				break;
 		}
-		printf("ESTADO [%d] %c %d \n",state,c,double_quote);
+		printf("%c %d\n",c,state);
 		p++;
-	}while(!end);
+	}while(!end && c!=EOF);
+
+	//if(end==0) return -1;
+
 	lexcomp->keyword[p]='\0';
 	lexcomp->value=1000;
 }
@@ -172,7 +182,11 @@ void next_lexcomp(){
 				break;
 			case '\"':
 			case '\'':
-				_quotes_at(&current_lex);
+				if(_quotes_at(&current_lex)==-1){
+					printf("Error\n");
+					return;
+				}
+				//previous_char();
 				printf("current lex_comp[%d] : %s \n",current_lex.value,current_lex.keyword);
 				break;
 

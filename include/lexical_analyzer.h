@@ -6,7 +6,7 @@
 #include "definitions.h"
 
 //Tamaño reservado de palabra clave
-#define KEYWORDSIZE 20
+#define KEYWORDSIZE 200
 
 typedef struct{
 	char	keyword[KEYWORDSIZE];
