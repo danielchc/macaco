@@ -68,13 +68,13 @@ char next_char(){
 		movome o carácter anterior
 */
 void previous_char(){
-	//Movome unha posición atrás
-	sentinel.position--;
 	//Se o punteiro do centinela é negativo cambio de bloque e movome segunda posición comezando por detrás do outro bloque
 	if (sentinel.position<0){
 		sentinel.current_block=(sentinel.current_block==BLOCK_A)?BLOCK_B:BLOCK_A;
 		sentinel.position= BLOCK_SIZE - 2;
 	}
+	//Movome unha posición atrás
+	sentinel.position--;
 	//Devolvo a nova posición
 	//return sentinel.block[sentinel.current_block][sentinel.position];
 }

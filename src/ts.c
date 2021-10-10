@@ -1,4 +1,5 @@
 #include "ts.h"
+#include "lexical_analyzer.h"
 lexcomp_t keywords[]={
 	{"False",_FALSE},
 	{"await",_AWAIT},

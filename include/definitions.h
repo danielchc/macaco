@@ -1,14 +1,5 @@
 #ifndef DEFINITIONS
 #define DEFINITIONS
-#include <stdlib.h>
-
-//Tamaño reservado de palabra clave
-#define KEYWORDSIZE 12
-
-typedef struct{
-	char	keyword[KEYWORDSIZE];
-	uint   	value;
-}lexcomp_t;
 
 //Palabras clave
 #define _FALSE 	    	301
@@ -48,6 +39,6 @@ typedef struct{
 #define _YIELD 	    	335
 
 #define _ID				400
-
+#define _NUMERIC		401
 
 #endif
