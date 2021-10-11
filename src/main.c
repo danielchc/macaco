@@ -11,8 +11,8 @@
 int main(int argc, char* argv[]){
 	ts_s k;
 
-	load_file("test.txt");
-	//load_file("wilcoxon.py");
+	//load_file("test.txt");
+	load_file("wilcoxon.py");
 
 	next_lexcomp();
 	
