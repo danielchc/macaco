@@ -15,10 +15,13 @@ sentinel_t sentinel;
 
 int load_file(char* filename){
 	fp=fopen(filename,"r");
+	sentinel.block[BLOCK_A]=malloc(sizeof(char)*BLOCK_SIZE);
+	sentinel.block[BLOCK_B]=malloc(sizeof(char)*BLOCK_SIZE);
 	if(fp==NULL) return -1;
 	sentinel.current_block=BLOCK_A;
-	sentinel.position=-1;
 	load_block(BLOCK_A);
+	sentinel.inicio=sentinel.block[BLOCK_A];
+	sentinel.dianteiro=sentinel.block[BLOCK_A];
 	return 0;
 }
 
@@ -38,29 +41,31 @@ int load_block(block_t block){
 	return n;
 }
 
-/*
-	next_char
-		devolve o seguinte carácter do centinela
-	return:
-		devolve o seguinte carácter
-*/
+// /*
+// 	next_char
+// 		devolve o seguinte carácter do centinela
+// 	return:
+// 		devolve o seguinte carácter
+// */
 char next_char(){
 	block_t new_block;
-	//Aumento a posición do punteiro do centinela
-	sentinel.position++;
-	//Se chego o final(atopo o EOF)
-	if(sentinel.block[sentinel.current_block][sentinel.position]==EOF){
-		//Se chego o carácter non está na última posición do array cheguei o fin do arquivo, devolvo EOF
-		if(sentinel.position != BLOCK_SIZE - 1) return EOF;
-		//Cambio de bloque
+// 	//Aumento a posición do punteiro do centinela
+// 	//Se chego o final(atopo o EOF)
+
+//se o punteiro está na ultima posicion do array
+	if(*(sentinel.dianteiro)==EOF){
+		if(sentinel.dianteiro!=(sentinel.block[sentinel.current_block]+(BLOCK_SIZE - 1))) return EOF;
 		new_block=(sentinel.current_block==BLOCK_A)?BLOCK_B:BLOCK_A;
-		//Cargo o novo bloque
 		load_block(new_block);
-		//Establezco o novo bloque e poño a posición a 0
 		sentinel.current_block=new_block;
-		sentinel.position=0;
+		sentinel.dianteiro=sentinel.block[sentinel.current_block];
+
+	//	if( sentinel.dianteiro )
+
+
 	}
-	return sentinel.block[sentinel.current_block][sentinel.position];
+	sentinel.dianteiro++;
+	return *(sentinel.dianteiro-1);
 }
 
 /*
@@ -69,23 +74,20 @@ char next_char(){
 */
 void previous_char(){
 	//Se o punteiro do centinela é negativo cambio de bloque e movome segunda posición comezando por detrás do outro bloque
-	if (sentinel.position<0){
+	if (sentinel.block[sentinel.current_block]==sentinel.dianteiro){
 		sentinel.current_block=(sentinel.current_block==BLOCK_A)?BLOCK_B:BLOCK_A;
-		sentinel.position= BLOCK_SIZE - 2;
+		sentinel.dianteiro=sentinel.block[sentinel.current_block]+(BLOCK_SIZE-1);
 	}
-	//Movome unha posición atrás
-	sentinel.position--;
-	//Devolvo a nova posición
-	//return sentinel.block[sentinel.current_block][sentinel.position];
+	sentinel.dianteiro--;
 }
 
-/*
-	#DEBUG
-	print_block
-		imprime un bloque
-	param:  
-		block_t block: bloque a mostrar (BLOCK_A,BLOCK_B)
-*/
+// /*
+// 	#DEBUG
+// 	print_block
+// 		imprime un bloque
+// 	param:  
+// 		block_t block: bloque a mostrar (BLOCK_A,BLOCK_B)
+// */
 
 void print_block(block_t block){
 	printf("BLOCK %c[",sentinel.current_block==BLOCK_A?'A':'B');
@@ -99,3 +101,4 @@ void print_block(block_t block){
 	}
 	printf("]\n");
 }
+

@@ -13,16 +13,17 @@ typedef enum {
 
 //Estructura lectura centinela
 typedef struct {
-    char block[2][BLOCK_SIZE];
+    char* block[2];
+    char* inicio;
+    char* dianteiro;
     block_t current_block;
-    int position;
 } sentinel_t;
 
 
 int load_file(char* filename);
 int load_block(block_t block);
-char next_char();
-void previous_char();
+// char next_char();
+// void previous_char();
 
 
 #endif
