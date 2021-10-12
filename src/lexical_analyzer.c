@@ -12,8 +12,16 @@ char _get_next_char(){
 	return c;
 }
 
-int is_operator(char c){
-	return (c=='+' || c=='-' || c=='*' || c== '/' || c=='%' || c=='>' || c=='<' || c=='=');
+
+
+int _is_token(char c){
+	return (
+		(c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == '%') || 	\
+		(c == '@') || (c == '&') || (c == '|') || (c == '^') || (c == '~') ||   \
+		(c == '(') || (c == ')') || (c == '[') || (c == ']') || (c == '{') || 	\
+		(c == '}') || (c == ',') || (c == ':') || (c == '.') || (c == ';') || 	\
+		(c == '=') || (c == '>') || (c == '<')									\
+	);
 }
 
 int _alphanumeric_at(){
@@ -28,6 +36,8 @@ int _alphanumeric_at(){
 int _comments_at(){
 	previous_char();
 	char c;
+	c=_get_next_char();
+	if( c!='#' ) return -1;
 	do{
 		c=_get_next_char();
 	}while(c!='\n');
@@ -148,45 +158,78 @@ quote_t _quotes_at(){
 	return QT_ERROR;
 }
 
+
+
+/*MOVER ESTO*/
+typedef struct{
+	char c;
+	int value;
+}nested_ta_t;
+
 typedef struct{
 	char c1;
 	char c2;
 	int value;
-} tw_t;
+	nested_ta_t c3;
+} _token_at_t;
 
-tw_t paco[]={
-	{'<','<',2000},
-	{'<','=',2001},
-	{'>','>',2002},
-	{'>','=',2000},
-	{'=','=',2000},
-	{'*','*',2000},
-	{'*','=',2000},
-	{'+','=',2000},
-	{'-','=',2000},
-	{'/','=',2000},
-	{'%','=',2000},
+
+const _token_at_t validTokens[]={
+	{'<','<',_SHIFTL,{'=',_SHTLEQ}},
+	{'>','>',_SHIFTR,{'=',_SHTREQ}},
+	{'*','*',_POW,{'=',_POWEQ}},
+	{'/','/',_FDIV,{'=',_FDIVEQ}},
+	{'<','=',_LEQ,{_NOP}},
+	{'>','=',_GEQ,{_NOP}},
+	{'=','=',_EQ,{_NOP}},
+	{'!','=',_NEQ,{_NOP}},
+	{'-','>',_FUNA,{_NOP}},
+	{'+','=',_ADDEQ,{_NOP}},
+	{'-','=',_SUBEQ,{_NOP}},
+	{'*','=',_MULEQ,{_NOP}},
+	{'/','=',_DIVEQ,{_NOP}},
+	{'%','=',_PEREQ,{_NOP}},
+	{'&','=',_IAND,{_NOP}},
+	{'|','=',_IOR,{_NOP}},
+	{'^','=',_IXOR,{_NOP}},
 };
 
-int _operator_at(){
+int _token_at(){
 	previous_char();
-	char c1,c2;
+	char c1,c2,c3;
 	c1=_get_next_char();
+	c2=_get_next_char();
 
-	if(is_operator(c1)){
-		c2=_get_next_char();
-		if(!is_operator(c2)){
-			previous_char();
-			return c1; //DEVOLVE O VALOR ASCII DO OPERADOR
-		}else{
-			int i;
-			for(i=0;i<sizeof(paco);i++){
-				if((c1==paco[i].c1) && (c2==paco[i].c2)) return paco[i].value;
-			}
-		}
-
+	if(!_is_token(c1)){
+		printf("Tocou\n");
+		return -1;
 	}
-	return -1;
+	
+	if(!_is_token(c2)){
+		previous_char();
+		return c1;
+	}
+
+	int i;
+	for(i=0;i<sizeof(validTokens)/sizeof(_token_at_t);i++){
+		if((c1==validTokens[i].c1) && (c2==validTokens[i].c2)){
+			if(validTokens[i].c3.c==_NOP){
+				return validTokens[i].value;
+			}else{
+				c3=_get_next_char();
+				if(!_is_token(c3)){
+					previous_char();
+					return validTokens[i].value;;
+				}else{
+					if(validTokens[i].c3.c==c3){
+						return validTokens[i].c3.value;
+					}
+				}
+			}
+		} 
+	}
+	previous_char();
+	return c1;
 }
 
 
@@ -197,18 +240,20 @@ void next_lexcomp(){
 	lines=1;
 	char c;
 	numeric_t tx;
+	quote_t t2;
 	int tipo;
 
 	do{
+		tipo=-1;
 		c = _get_next_char();
 		switch (c){
 			case '0' ... '9':
-			case '.':
 				tx=_numeric_at();
 				if(tx==NT_ERROR){
 					printf("Error número mal definido\n");
 					return;
 				}
+				tipo=tx==NT_DECIMAL?_DECIMAL:_INTEGER;
 				//printf("TIPO %d",tx);
 				previous_char();
 				break;
@@ -217,32 +262,52 @@ void next_lexcomp(){
 			case '_':
 				_alphanumeric_at();
 				previous_char();
+				tipo=_ID;
 				break;
 			case '\"':
 			case '\'':
-				if(_quotes_at()==QT_ERROR){
+				t2=_quotes_at();
+				if(t2==QT_ERROR){
 					printf("Error\n");
 					return;
 				}
-				
+				tipo=t2==QT_COMMENT?_COMMENT:_STRING;
 				break;
 			case '#':
+				tipo=_COMMENT;
 				_comments_at();
 				break;
 			case '+':
 			case '-':
-			case '*': 
-			case  '/': 
-			case '%': 
-			case '>': 
+			case '*':
+			case '/':
+			case '%':
+			case '&':
+			case '|':
+			case '^':
+			case '~':
+			case '(': 
+			case ')': 
+			case '[': 
+			case ']': 
+			case '{': 
+			case '}': 
+			case ',': 
+			case ':': 
+			case ';': 
+			case '@': 
+			case '=':			
 			case '<': 
-			case '=':
-				tipo=_operator_at();
+			case '>':
+				tipo=_token_at();
+				break;
+			case '.':
+				_dot_at();
 				break;
 		}
 		currentlex=get_lexcomp();
 		if(currentlex[0]==32 || currentlex[0]=='\n')continue;
-		printf("COMPONENTE LEXICO [%d] %s\n",lines,currentlex);
+		printf("[%d]\tTipo [%d]\t%s\n",lines,tipo,currentlex);
 		
 	}while(c!=EOF);
 	
