@@ -11,34 +11,34 @@
 int main(int argc, char* argv[]){
 	ts_s k;
 
-	//load_file("test.txt");
-	load_file("wilcoxon.py");
+	load_file("test2.txt");
+	//load_file("wilcoxon.py");
 
 	
-	char c;
-	while(c!=EOF){
-		c=next_char();
-		printf("%c\n",c);
+	// char c;
+	// while(c!=EOF){
+		// c=next_char();
+		// printf("%c",c);
 
-	}
-	print_block(BLOCK_A);
+	// }
+	// print_block(BLOCK_A);
 
-	previous_char();
-	previous_char();
-	previous_char();
-	previous_char();
+	// previous_char();
+	// previous_char();
+	// previous_char();
+	// previous_char();
 
 
-	c=next_char();
-	printf("%c\n",c);
-	c=next_char();
-	printf("%c\n",c);
-	c=next_char();
-	printf("%c\n",c);
-	c=next_char();
-	printf("%c\n",c);
+	// c=next_char();
+	// printf("%c\n",c);
+	// c=next_char();
+	// printf("%c\n",c);
+	// c=next_char();
+	// printf("%c\n",c);
+	// c=next_char();
+	// printf("%c\n",c);
 
-	//next_lexcomp();
+	next_lexcomp();
 	
 	return 0;
 }
