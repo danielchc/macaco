@@ -1,9 +1,11 @@
 #ifndef INPUT_H
 #define INPUT_H
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 8
+#define BLOCK_SIZE 200
 
 //Bloques disponibles
 typedef enum {
@@ -17,13 +19,16 @@ typedef struct {
     char* inicio;
     char* dianteiro;
     block_t current_block;
+	//TEMPORAL
+    block_t inicio_block;
 } sentinel_t;
 
 
 int load_file(char* filename);
 int load_block(block_t block);
-// char next_char();
-// void previous_char();
+char* get_lexcomp();
+char next_char();
+void previous_char();
 
 
 #endif

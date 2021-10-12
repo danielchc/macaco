@@ -9,10 +9,8 @@
 #include <limits.h>
 
 int main(int argc, char* argv[]){
-	ts_s k;
-
-	load_file("test2.txt");
-	//load_file("wilcoxon.py");
+	//load_file("test2.txt");
+	load_file("wilcoxon.py");
 
 	
 	// char c;

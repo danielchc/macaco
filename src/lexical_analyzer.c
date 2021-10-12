@@ -1,5 +1,5 @@
 #include "lexical_analyzer.h"
-
+#include "input.h"
 
 
 
@@ -30,15 +30,13 @@ char _get_next_char(){
 }
 
 
-int _numeric_at(lexcomp_t* lexcomp){
+int _numeric_at(){
 	int end=0;
 	_numeric_at_st state=NAT_UNK;
 	previous_char();
 	char c;
-	int p=0;
 	do{
 		c=_get_next_char();
-		lexcomp->keyword[p]=c;
 		c=tolower(c);
 		switch (state){
 			case NAT_ZEROSTART:
@@ -98,25 +96,17 @@ int _numeric_at(lexcomp_t* lexcomp){
 				else if(c=='.')state=NAT_DEC;
 				break;
 		}
-		p++;
 	}while(!end);
-	lexcomp->keyword[p-1]='\0';
-	lexcomp->value=_NUMERIC;
-	//printf("[LINEA %d] %s de tipo %d\n",lines,lexcomp->keyword,numeric_type);
+	return 0;
 }
 
-void _alphanumeric_at(lexcomp_t* lexcomp){
+int _alphanumeric_at(){
 	previous_char();
 	char c;
-	int p=0;
 	do{
 		c=_get_next_char();
-		lexcomp->keyword[p]=c;
-		p++;
 	}while(isalnum(c) || c == '_');
-	
-	lexcomp->keyword[p-1]='\0';
-	lexcomp->value=_ID;
+	return 0;
 }
 
 
@@ -129,16 +119,14 @@ typedef enum{
 	QAT_COMMENT
 }_quotes_at_st;
 
-int _quotes_at(lexcomp_t* lexcomp){
+int _quotes_at(){
 	previous_char();
 	int double_quote=0;
 	int end=0;
 	char c;
-	int p=0;
 	_quotes_at_st state=QAT_UNK;
 	do{
 		c=_get_next_char();
-		lexcomp->keyword[p]=c;
 		switch (state){
 			case QAT_UNK:
 				if (c=='\'') state=QAT_SIMPLE_QUOTE;
@@ -170,68 +158,62 @@ int _quotes_at(lexcomp_t* lexcomp){
 				break;
 		}
 		if(c==EOF)break;
-		p++;
 	}while(!end);
 
 	if(!end) return -1;
-
-	lexcomp->keyword[p]='\0';
-	lexcomp->value=1000;
+	return 0;
 }
 
-int _comments_at(lexcomp_t* lexcomp){
+int _comments_at(){
 	previous_char();
 	char c;
-	int p=0;
 	do{
 		c=_get_next_char();
-		lexcomp->keyword[p]=c;
-		p++;
 	}while(c!='\n');
-	
-	lexcomp->keyword[p-1]='\0';
-	lexcomp->value=900;
+	return 0;
 }
 
 //TODO : Mirar como arreglar detectar cadenas e números EOF
 void next_lexcomp(){
+	char* currentlex;
 	lines=1;
 	char c;
-	lexcomp_t current_lex;
-	current_lex.value=-1;
 	do{
 		c = _get_next_char();
 		switch (c){
 			case '0' ... '9':
 			case '.':
-				if(_numeric_at(&current_lex)==-1){
+				if(_numeric_at()==-1){
 					printf("Error\n");
 					return;
 				}
-				printf("current lex_comp(%d)[%d] : %s \n",lines,current_lex.value,current_lex.keyword);
 				previous_char();
 				break;
 			case 'A' ... 'Z':
 			case 'a' ... 'z':
 			case '_':
-				_alphanumeric_at(&current_lex);
-				printf("current lex_comp(%d) [%d] : %s \n",lines,current_lex.value,current_lex.keyword);
+				_alphanumeric_at();
 				previous_char();
 				break;
 			case '\"':
 			case '\'':
-				if(_quotes_at(&current_lex)==-1){
+				if(_quotes_at()==-1){
 					printf("Error\n");
 					return;
 				}
-				printf("current lex_comp(%d) [%d] : %s \n",lines,current_lex.value,current_lex.keyword);
 				break;
 			case '#':
-				_comments_at(&current_lex);
-				printf("current lex_comp(%d) [%d] : %s \n",lines,current_lex.value,current_lex.keyword);
+				_comments_at();
 				break;
-
 		}
+		currentlex=get_lexcomp();
+		if(currentlex[0]==32 || currentlex[0]=='\n')continue;
+		printf("COMPONENTE LEXICO [%d] %s\n",lines,currentlex);
+		// // if(lines==23){
+		// 	// print_block(BLOCK_A);
+		// 	// print_block(BLOCK_B);
+		// 	// return;
+		// // }
 	}while(c!=EOF);
 	
 }
