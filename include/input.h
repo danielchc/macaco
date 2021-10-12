@@ -5,7 +5,7 @@
 #include <string.h>
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 200
+#define BLOCK_SIZE 100
 
 //Bloques disponibles
 typedef enum {

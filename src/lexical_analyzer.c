@@ -31,7 +31,6 @@ char _get_next_char(){
 
 
 int _numeric_at(){
-	int end=0;
 	_numeric_at_st state=NAT_UNK;
 	previous_char();
 	char c;
@@ -46,57 +45,57 @@ int _numeric_at(){
 				else if(c=='e') state=NAT_EXP;
 				else if (c>='1' && c<='9') state=NAT_INT;
 				else if (c=='.') state=NAT_DEC;
-				else end=1;
+				else return 0;
 				break;
 			case NAT_INT:
 				if (c=='.') state=NAT_DEC;
 				else if (c=='e') state=NAT_EXP_UNSIGNED;
 				else if (c=='j') state=NAT_IMAGINARY;
-				else if (!(c>='0' && c<='9') && (c!='_')) end=1;
+				else if (!(c>='0' && c<='9') && (c!='_')) return 0;
 				break;
 			case NAT_DEC:
 				if (c=='e') state=NAT_EXP_UNSIGNED;
 				else if (c=='j') state=NAT_IMAGINARY;
-				else if(!(c>='0' && c<='9') && (c!='_')) end=1;
+				else if(!(c>='0' && c<='9') && (c!='_')) return 0;
 				break;
 			case NAT_EXP_UNSIGNED:
 				if ((c=='-') || (c=='+') || (c>='0' && c<='9')) state=NAT_EXP;
 				break;
 			case NAT_EXP:
 				if (c=='j') state=NAT_IMAGINARY;
-				else if (!(c>='0' && c<='9')) end=1;
+				else if (!(c>='0' && c<='9')) return 0;
 				break;
 			case NAT_BIN_1:
 				if (!(c=='0' || c=='1' || c=='_')) return -1;
 				else state=NAT_BIN_2;
 				break;
 			case NAT_BIN_2:
-				if (!(c=='0' || c=='1' || c=='_')) end=1;
+				if (!(c=='0' || c=='1' || c=='_')) return 0;
 				break;
 			case NAT_HEX_1:
 				if (!((c>='0' && c<='9') || (c>='a' && c<='f'))) return -1;
 				else state=NAT_HEX_2;
 				break;			
 			case NAT_HEX_2:
-				if (!((c>='0' && c<='9') || (c>='a' && c<='f'))) end=1;
+				if (!((c>='0' && c<='9') || (c>='a' && c<='f'))) return 0;
 				break;
 			case NAT_OCT_1:
 				if (!(c>='0' && c<='7')) return -1;
 				else state=NAT_OCT_2;
 				break;			
 			case NAT_OCT_2:
-				if (!(c>='0' && c<='7')) end=1;
+				if (!(c>='0' && c<='7')) return 0;
 				break;
 			case NAT_IMAGINARY:
-				end=1;
+				return 0;
 				break;
 			case NAT_UNK:
 				if(c=='0') state=NAT_ZEROSTART;
 				else if (c>='1'&& c<='9') state=NAT_INT;
-				else if(c=='.')state=NAT_DEC;
+				else if(c=='.') state=NAT_DEC;
 				break;
 		}
-	}while(!end);
+	}while(1);
 	return 0;
 }
 
@@ -122,7 +121,6 @@ typedef enum{
 int _quotes_at(){
 	previous_char();
 	int double_quote=0;
-	int end=0;
 	char c;
 	_quotes_at_st state=QAT_UNK;
 	do{
@@ -133,7 +131,7 @@ int _quotes_at(){
 				else if (c=='\"') state=QAT_DOUBLE_QUOTE_1;
 				break;
 			case QAT_SIMPLE_QUOTE:
-				if(c=='\'') end=1;
+				if(c=='\'') return 0;
 				break;
 			case QAT_DOUBLE_QUOTE_1:
 				if(c=='\"') state=QAT_DOUBLE_QUOTE_2;
@@ -146,22 +144,21 @@ int _quotes_at(){
 				}else {
 					//A cadena vacia recoñecese co fin de liña, polo cal hai que volver un paso atrás
 					previous_char();
-					end=1;
+					return 0;
 				}
 				break;
 			case QAT_COMMENT:
 				if(c=='\"') double_quote--;
-				if(double_quote==0) end=1;
+				if(double_quote==0) return 0;
 				break;
 			case QAT_CONTENT:
-				if(c=='\"') end=1;
+				if(c=='\"') return 0;
 				break;
 		}
 		if(c==EOF)break;
-	}while(!end);
+	}while(1);
 
-	if(!end) return -1;
-	return 0;
+	return -1;
 }
 
 int _comments_at(){
