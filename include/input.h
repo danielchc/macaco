@@ -5,7 +5,7 @@
 #include <string.h>
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 100
+#define BLOCK_SIZE 200
 
 //Bloques disponibles
 typedef enum {
@@ -16,11 +16,14 @@ typedef enum {
 //Estructura lectura centinela
 typedef struct {
     char* block[2];
-    char* inicio;
-    char* dianteiro;
-    block_t current_block;
-	//TEMPORAL
-    block_t inicio_block;
+    //Punteiro onde se atopa o inicio do compoñente léxico
+    char* start;
+    //Punteiro onde se atopa o lector centinela
+    char* front;
+    //Bloque onde se atopa o lector do centinela
+    block_t front_block;
+    //Bloque onde se atopa o inicio do compoñente léxico
+    block_t start_block;
 } sentinel_t;
 
 

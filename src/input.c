@@ -5,28 +5,65 @@ sentinel_t sentinel;
 
 
 
+/*
+	_lex_size
+		calcula o tamaño actual do compoñente léxico
+		(f) dianteiro
+		(s) inicio
+		-CASO A: Mesmo bloque
+				            
+		----(s)----------(f)-
+		|  | f | o | r | EOF 
+		-----^---------------
+		Tamaño = (POS(f) - POS(s))
+		- CASO B:Bloques distintos
+				BLOQUE A                BLOQUE B          
+		-------------(f)-----    ----(s)--------------
+		| o | r | t |   | EOF    |  | i | m | p | EOF
+		---------------------    -----^----------------
+		Tamaño = ((INICIO(BLOQUE_B) + TAM(BLOQUE_B))  -  POS(s)) + (POS(f) - INICIO(BLOQUE_A))
+	return:
+		devolve o tamaño do lexema actual
+*/
 int _lex_size(){
-	if(sentinel.current_block==sentinel.inicio_block){
-		return (sentinel.dianteiro-sentinel.inicio);
+	//CASO(A)
+	//Se o inicio dianteiro están no mesmo bloque que inicio resto as posicións de memoria
+	if(sentinel.front_block==sentinel.start_block){
+		return (sentinel.front-sentinel.start);
+	//CASO(B)
+	//Se están noutro bloque, calculo o tamaño que ocupa dianteiro no seu bloque, e o tamaño que ocupa inicio no seu bloque
 	}else{
-		int v1=(sentinel.dianteiro -(sentinel.block[sentinel.current_block]));
-		int v2=(((sentinel.block[sentinel.inicio_block])+BLOCK_SIZE-1)-sentinel.inicio);
+		//Posición dianteira, menos o comezo do bloque 
+		int v1=(sentinel.front -(sentinel.block[sentinel.front_block]));
+		//Final do bloque menos a posición do inicio
+		int v2=(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start);
 		return v1+v2;
 	}
 	
 }
 
+/*
+	_get_lexcomp()
+		obtén o último compeñente léxico
+	return:
+		devolve a cadea de texto
+*/
+
 char* get_lexcomp(){
+
+	//Reservo memoria para o compoñente léxico
 	char* current=malloc(sizeof(char)*BLOCK_SIZE);
-	if(sentinel.current_block==sentinel.inicio_block){
-		memcpy(current,sentinel.inicio,(sentinel.dianteiro-sentinel.inicio));
+	//Se inicio e dianteiro se atopan no mesmo bloque, copio os bytes que hai entre as dúas posicións de memoria
+	if(sentinel.front_block==sentinel.start_block){
+		memcpy(current,sentinel.start,(sentinel.front-sentinel.start));
 	}else{
-		memcpy(current,sentinel.inicio,(((sentinel.block[sentinel.inicio_block])+BLOCK_SIZE-1)-sentinel.inicio));
-		memcpy(current+(((sentinel.block[sentinel.inicio_block])+BLOCK_SIZE-1)-sentinel.inicio),sentinel.block[sentinel.current_block],(sentinel.dianteiro -(sentinel.block[sentinel.current_block])));
+		memcpy(current,sentinel.start,(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start));
+		memcpy(current+(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start),sentinel.block[sentinel.front_block],(sentinel.front -(sentinel.block[sentinel.front_block])));
 	}
 	
-	sentinel.inicio=sentinel.dianteiro;
-	sentinel.inicio_block=sentinel.current_block;
+	//Actualizo os punteiros para poder obter o novos compoñentes léxicos
+	sentinel.start=sentinel.front;
+	sentinel.start_block=sentinel.front_block;
 	return current;
 }
 
@@ -43,14 +80,18 @@ char* get_lexcomp(){
 
 int load_file(char* filename){
 	fp=fopen(filename,"r");
+	//Se hai erro devolvo -1
+	if(fp==NULL) return -1;
+	//Reservo memoria para os bloques A e B
 	sentinel.block[BLOCK_A]=malloc(sizeof(char)*BLOCK_SIZE);
 	sentinel.block[BLOCK_B]=malloc(sizeof(char)*BLOCK_SIZE);
-	if(fp==NULL) return -1;
-	sentinel.current_block=BLOCK_A;
-	sentinel.inicio_block=BLOCK_A;
+	//Cargo o primeiro bloque
 	load_block(BLOCK_A);
-	sentinel.inicio=sentinel.block[BLOCK_A];
-	sentinel.dianteiro=sentinel.block[BLOCK_A];
+	//Establezco as posicións dos punteiros en 
+	sentinel.front_block=BLOCK_A;
+	sentinel.start_block=BLOCK_A;
+	sentinel.start=sentinel.block[BLOCK_A];
+	sentinel.front=sentinel.block[BLOCK_A];
 	return 0;
 }
 
@@ -65,6 +106,8 @@ int load_file(char* filename){
 
 int load_block(block_t block){
 	int n;
+	//Leo o mesmo número de carácteres que o tamaño de bloque e coloco un EOF o final dos carácteres que lin
+	//fread devolve o número de carácteres lidos, así que cando acabe o arquivo xa me coloca o EOF sen necesidade de facer unha comprobación
 	n=fread(sentinel.block[block],sizeof(char),BLOCK_SIZE-1,fp);
 	sentinel.block[block][n]=EOF;
 	return n;
@@ -78,13 +121,22 @@ int load_block(block_t block){
 */
 char next_char(){
 	block_t new_block;
-	if(*(sentinel.dianteiro)==EOF){
-		if(sentinel.dianteiro!=(sentinel.block[sentinel.current_block]+(BLOCK_SIZE - 1))) return EOF;
-		new_block=(sentinel.current_block==BLOCK_A)?BLOCK_B:BLOCK_A;
-		load_block(new_block);
-		sentinel.current_block=new_block;
-		sentinel.dianteiro=sentinel.block[sentinel.current_block];
+	//Se estou no final do bloque, teño que cargar o bloque novo
+	if(*(sentinel.front)==EOF){
+		//Se o final do bloque non está no final 
+		if(sentinel.front!=(sentinel.block[sentinel.front_block]+(BLOCK_SIZE - 1))) 
+			return EOF;
+		//Alterno de bloque
+		new_block=(sentinel.front_block==BLOCK_A)?BLOCK_B:BLOCK_A;
 
+		//Cargo o novo bloque
+		load_block(new_block);
+
+		//Establezco o novo bloque e o novo inicio
+		sentinel.front_block=new_block;
+		sentinel.front=sentinel.block[sentinel.front_block];
+
+		//Se o lexema é moi grande envio o xestor de rrors
 		if( _lex_size() > BLOCK_SIZE ){
 			printf("O lexema é moi grande\n");
 			return;
@@ -92,8 +144,10 @@ char next_char(){
 
 
 	}
-	sentinel.dianteiro++;
-	return *(sentinel.dianteiro-1);
+	//Aumento o punteiro para a seguinte iteracción
+	sentinel.front++;
+	//Mostro o carácter actual
+	return *(sentinel.front-1);
 }
 
 /*
@@ -101,12 +155,15 @@ char next_char(){
 		movome o carácter anterior
 */
 void previous_char(){
-	//Se o punteiro do centinela é negativo cambio de bloque e movome segunda posición comezando por detrás do outro bloque
-	if (sentinel.block[sentinel.current_block]==sentinel.dianteiro){
-		sentinel.current_block=(sentinel.current_block==BLOCK_A)?BLOCK_B:BLOCK_A;
-		sentinel.dianteiro=sentinel.block[sentinel.current_block]+(BLOCK_SIZE-1);
+	//Se o punteiro do centinela é igual o punteiro do inicio de bloque e movome a última posición
+	if (sentinel.block[sentinel.front_block]==sentinel.front){
+		//Alterno de bloque
+		sentinel.front_block=(sentinel.front_block==BLOCK_A)?BLOCK_B:BLOCK_A;
+		//Poñome na última posición (EOF), corrixoo ca instrucción final
+		sentinel.front=sentinel.block[sentinel.front_block]+(BLOCK_SIZE-1);
 	}
-	sentinel.dianteiro--;
+	//Movome unha posición atrás
+	sentinel.front--;
 }
 
 /*
@@ -119,8 +176,8 @@ void previous_char(){
 
 void print_block(block_t block){
 	printf("BLOCK %c[",block==BLOCK_A?'A':'B');
-	printf("%p\n",sentinel.dianteiro);
-	printf("%p\n",sentinel.inicio);
+	printf("%p\n",sentinel.front);
+	printf("%p\n",sentinel.start);
 	char cur;
 	int i;
 	for(i=0;i<BLOCK_SIZE-1;i++){
