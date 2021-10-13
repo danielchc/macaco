@@ -47,6 +47,10 @@
 #define _COMMENT		403
 #define _TERROR			404
 
+
+#define _EOF			    450
+#define _NEWLINE			451
+
 //Operadores simples
 
 #define _ADD		43 		/*  +  */

@@ -32,7 +32,6 @@ char _get_next_char(){
 }
 
 
-
 int _is_token(char c){
 	return (
 		(c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == '%') || 	\
@@ -66,11 +65,11 @@ int _comments_at(){
 	return 0;
 }
 
-numeric_t _numeric_at(char c1){
+numeric_t _numeric_at(){
+	previous_char();
 	numeric_t type=NT_INTEGER;
 	_numeric_at_st state=NAT_UNK;
-	//previous_char();
-	char c=c1;
+	char c;
 	do{
 		//printf("ACTUAL NUMERICO %c\n",c);
 		switch (state){
@@ -234,8 +233,7 @@ lexcomp_t next_lexcomp(){
 	//printf("ACTUAL GENERAL %c\n",c);
 	switch (c){
 		case '0' ... '9':
-
-			tx=_numeric_at(c);
+			tx=_numeric_at();
 			previous_char();
 			if(tx==NT_ERROR){
 				printf("Error número mal definido\n");
@@ -287,7 +285,10 @@ lexcomp_t next_lexcomp(){
 			tipo=_token_at();
 			break;
 		case EOF:
-			tipo=-10;
+			tipo=_EOF;
+			break;		
+		case '\n':
+			tipo=_NEWLINE;
 			break;
 	}
 	strcpy(currentlex.keyword,get_lexcomp());

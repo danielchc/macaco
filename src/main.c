@@ -8,6 +8,15 @@
 #include <string.h>
 #include <limits.h>
 
+
+
+void print_unescaped(char* ptr) {
+    if (!ptr) return;
+    for (int i = 0; i < sizeof(ptr)/sizeof(char); i++, ptr++) {
+        printf("%c",*ptr);
+    }
+}
+
 int main(int argc, char* argv[]){
 	//
 
@@ -22,8 +31,8 @@ int main(int argc, char* argv[]){
 	do{
 		lex=next_lexcomp();
 		if(lex.keyword[0]==32)continue;
-		printf("Tipo [%d]\t%s\n",lex.value,lex.keyword);
-	}while(lex.value!=-10);
+		printf("Tipo [%d]\t%s\n ",lex.value,lex.keyword);
+	}while(lex.value!=_EOF);
 	
 	return 0;
 }
