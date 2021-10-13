@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
 	lexcomp_t lex;
 	do{
 		lex=next_lexcomp();
-		if(lex.keyword[0]==32)continue;
+		if(lex.keyword[0]==32 || lex.keyword[0]=='\n')continue;
 		printf("Tipo [%d]\t%s\n ",lex.value,lex.keyword);
 	}while(lex.value!=_EOF);
 	

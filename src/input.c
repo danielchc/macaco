@@ -121,14 +121,11 @@ int load_block(block_t block){
 */
 char next_char(){
 	block_t new_block;
-
-
-
-
 	//Se estou no final do bloque, teño que cargar o bloque novo
 	if(*(sentinel.front)==EOF){
 		//Se o final do bloque non está no final 
 		if(sentinel.front!=(sentinel.block[sentinel.front_block]+(BLOCK_SIZE - 1))){
+			//Se termina movo o punteiro igual para evitar que quede en bucle
 			sentinel.front++;
 			return EOF;
 		} 
@@ -153,8 +150,7 @@ char next_char(){
 	//Aumento o punteiro para a seguinte iteracción
 	sentinel.front++;
 
-	//Mostro o carácter actual
-	//printf("ACTUAL: %c\n",*sentinel.front);
+	//Devolvo o carácter actual
 	return *(sentinel.front-1);
 }
 

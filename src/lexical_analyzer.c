@@ -49,7 +49,6 @@ int _alphanumeric_at(){
 		c=_get_next_char();
 	}while(isalnum(c) || c == '_');
 
-	if(c!=EOF) previous_char();
 
 	return 0;
 }
@@ -230,7 +229,6 @@ lexcomp_t next_lexcomp(){
 
 
 	c = _get_next_char();
-	//printf("ACTUAL GENERAL %c\n",c);
 	switch (c){
 		case '0' ... '9':
 			tx=_numeric_at();
@@ -245,6 +243,7 @@ lexcomp_t next_lexcomp(){
 		case 'a' ... 'z':
 		case '_':
 			_alphanumeric_at();
+			previous_char();
 			tipo=_ID;
 			break;
 		case '\"':
