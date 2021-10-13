@@ -9,34 +9,21 @@
 #include <limits.h>
 
 int main(int argc, char* argv[]){
-	load_file("test.txt");
-	//load_file("wilcoxon.py");
+	//
+
+	if(argc==2){
+		load_file(argv[1]);
+	}else{
+		load_file("wilcoxon.py");
+	}
 
 	
-	// char c;
-	// while(c!=EOF){
-		// c=next_char();
-		// printf("%c",c);
-
-	// }
-	// print_block(BLOCK_A);
-
-	// previous_char();
-	// previous_char();
-	// previous_char();
-	// previous_char();
-
-
-	// c=next_char();
-	// printf("%c\n",c);
-	// c=next_char();
-	// printf("%c\n",c);
-	// c=next_char();
-	// printf("%c\n",c);
-	// c=next_char();
-	// printf("%c\n",c);
-
-	next_lexcomp();
+	lexcomp_t lex;
+	do{
+		lex=next_lexcomp();
+		if(lex.keyword[0]==32)continue;
+		printf("Tipo [%d]\t%s\n",lex.value,lex.keyword);
+	}while(lex.value!=-10);
 	
 	return 0;
 }

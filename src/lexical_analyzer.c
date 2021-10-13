@@ -66,14 +66,13 @@ int _comments_at(){
 	return 0;
 }
 
-numeric_t _numeric_at(){
+numeric_t _numeric_at(char c1){
 	numeric_t type=NT_INTEGER;
 	_numeric_at_st state=NAT_UNK;
-	previous_char();
-	char c;
+	//previous_char();
+	char c=c1;
 	do{
-		c=_get_next_char();
-		c=tolower(c);
+		//printf("ACTUAL NUMERICO %c\n",c);
 		switch (state){
 			case NAT_ZEROSTART:
 				if(c=='x') state=NAT_HEX_1;
@@ -133,8 +132,10 @@ numeric_t _numeric_at(){
 				else if(c=='.') state=NAT_DEC;
 				break;
 		}
-	}while(1);
-	return NT_ERROR;
+		c=_get_next_char();
+		c=tolower(c);
+	}while(c!=EOF);
+	return type;
 }
 
 quote_t _quotes_at(){
@@ -220,82 +221,76 @@ int _token_at(){
 
 
 //TODO : Mirar como arreglar detectar cadenas e números EOF
-void next_lexcomp(){
-	char* currentlex;
+lexcomp_t next_lexcomp(){
+	lexcomp_t currentlex;
 	lines=1;
 	char c;
 	numeric_t tx;
 	quote_t t2;
-	int tipo;
+	int tipo=-1;
 
-	int temp=0;
 
-	do{
-		tipo=-1;
-		c = _get_next_char();
-		switch (c){
-			case '0' ... '9':
-				tx=_numeric_at();
-				previous_char();
-				if(tx==NT_ERROR){
-					printf("Error número mal definido\n");
-					return;
-				}
-				tipo=tx==NT_DECIMAL?_DECIMAL:_INTEGER;
-				//printf("TIPO %d",tx);
-				break;
-			case 'A' ... 'Z':
-			case 'a' ... 'z':
-			case '_':
-				_alphanumeric_at();
-				tipo=_ID;
-				break;
-			case '\"':
-			case '\'':
-				t2=_quotes_at();
-				if(t2==QT_ERROR){
-					printf("Error comillas mal definidas\n");
-					return;
-				}
-				tipo=t2==QT_COMMENT?_COMMENT:_STRING;
-				break;
-			case '#':
-				tipo=_COMMENT;
-				_comments_at();
-				break;
-			case '+':
-			case '-':
-			case '*':
-			case '/':
-			case '%':
-			case '&':
-			case '|':
-			case '^':
-			case '~':
-			case '(': 
-			case ')': 
-			case '[': 
-			case ']': 
-			case '{': 
-			case '}': 
-			case ',': 
-			case ':': 
-			case ';': 
-			case '@': 
-			case '=':			
-			case '<': 
-			case '>':
-				tipo=_token_at();
-				break;
-			// case '.':
-			// 	_dot_at();
-			// 	break;
-		}
-		currentlex=get_lexcomp();
-		if(currentlex[0]==32 || currentlex[0]=='\n')tipo=currentlex[0];
-		printf("[%d]\tTipo [%d]\t%s\n",lines,tipo,currentlex);
-		
+	c = _get_next_char();
+	//printf("ACTUAL GENERAL %c\n",c);
+	switch (c){
+		case '0' ... '9':
 
-	}while(c!=EOF);
-	
+			tx=_numeric_at(c);
+			previous_char();
+			if(tx==NT_ERROR){
+				printf("Error número mal definido\n");
+				return;
+			}
+			tipo=tx==NT_DECIMAL?_DECIMAL:_INTEGER;
+			break;
+		case 'A' ... 'Z':
+		case 'a' ... 'z':
+		case '_':
+			_alphanumeric_at();
+			tipo=_ID;
+			break;
+		case '\"':
+		case '\'':
+			t2=_quotes_at();
+			if(t2==QT_ERROR){
+				printf("Error comillas mal definidas\n");
+				return;
+			}
+			tipo=t2==QT_COMMENT?_COMMENT:_STRING;
+			break;
+		case '#':
+			tipo=_COMMENT;
+			_comments_at();
+			break;
+		case '+':
+		case '-':
+		case '*':
+		case '/':
+		case '%':
+		case '&':
+		case '|':
+		case '^':
+		case '~':
+		case '(': 
+		case ')': 
+		case '[': 
+		case ']': 
+		case '{': 
+		case '}': 
+		case ',': 
+		case ':': 
+		case ';': 
+		case '@': 
+		case '=':			
+		case '<': 
+		case '>':
+			tipo=_token_at();
+			break;
+		case EOF:
+			tipo=-10;
+			break;
+	}
+	strcpy(currentlex.keyword,get_lexcomp());
+	currentlex.value=tipo;
+	return currentlex;
 }

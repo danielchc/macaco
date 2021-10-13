@@ -64,6 +64,6 @@ typedef struct{
 }lexcomp_t;
 
 
-void next_lexcomp();
+lexcomp_t next_lexcomp();
 
 #endif
