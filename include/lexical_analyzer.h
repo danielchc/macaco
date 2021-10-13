@@ -6,7 +6,7 @@
 #include "definitions.h"
 
 //Tamaño reservado de palabra clave
-#define KEYWORDSIZE 40000
+#define KEYWORDSIZE 200
 
 typedef enum{
 	NT_ERROR,

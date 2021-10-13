@@ -4,10 +4,9 @@ FILE* fp;
 sentinel_t sentinel;
 
 
-
 /*
-	_lex_size
-		calcula o tamaño actual do compoñente léxico
+	_get_lexcomp()
+		obtén o último compeñente léxico
 		(f) dianteiro
 		(s) inicio
 		-CASO A: Mesmo bloque
@@ -22,29 +21,6 @@ sentinel_t sentinel;
 		| o | r | t |   | EOF    |  | i | m | p | EOF
 		---------------------    -----^----------------
 		Tamaño = ((INICIO(BLOQUE_B) + TAM(BLOQUE_B))  -  POS(s)) + (POS(f) - INICIO(BLOQUE_A))
-	return:
-		devolve o tamaño do lexema actual
-*/
-int _lex_size(){
-	//CASO(A)
-	//Se o inicio dianteiro están no mesmo bloque que inicio resto as posicións de memoria
-	if(sentinel.front_block==sentinel.start_block){
-		return (sentinel.front-sentinel.start);
-	//CASO(B)
-	//Se están noutro bloque, calculo o tamaño que ocupa dianteiro no seu bloque, e o tamaño que ocupa inicio no seu bloque
-	}else{
-		//Posición dianteira, menos o comezo do bloque 
-		int v1=(sentinel.front -(sentinel.block[sentinel.front_block]));
-		//Final do bloque menos a posición do inicio
-		int v2=(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start);
-		return v1+v2;
-	}
-	
-}
-
-/*
-	_get_lexcomp()
-		obtén o último compeñente léxico
 	return:
 		devolve a cadea de texto
 */
@@ -64,6 +40,7 @@ char* get_lexcomp(){
 	//Actualizo os punteiros para poder obter o novos compoñentes léxicos
 	sentinel.start=sentinel.front;
 	sentinel.start_block=sentinel.front_block;
+	sentinel.lexsize=0;
 	return current;
 }
 
@@ -92,6 +69,7 @@ int load_file(char* filename){
 	sentinel.start_block=BLOCK_A;
 	sentinel.start=sentinel.block[BLOCK_A];
 	sentinel.front=sentinel.block[BLOCK_A];
+	sentinel.lexsize=0;
 	return 0;
 }
 
@@ -138,17 +116,16 @@ char next_char(){
 		//Establezco o novo bloque e o novo inicio
 		sentinel.front_block=new_block;
 		sentinel.front=sentinel.block[sentinel.front_block];
+	}
 
-		//Se o lexema é moi grande envio o xestor de rrors
-		if( _lex_size() > BLOCK_SIZE ){
-			printf("O lexema é moi grande\n");
-			return -1;
-		}
-
-
+	//Se o lexema é moi grande envio o xestor de errors
+	if( sentinel.lexsize > BLOCK_SIZE ){
+		printf("O lexema é moi grande %d \n",sentinel.lexsize);
+		exit(-1);
 	}
 	//Aumento o punteiro para a seguinte iteracción
 	sentinel.front++;
+	sentinel.lexsize++;
 
 	//Devolvo o carácter actual
 	return *(sentinel.front-1);

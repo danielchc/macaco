@@ -5,7 +5,7 @@
 #include <string.h>
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 200
+#define BLOCK_SIZE 50000
 
 //Bloques disponibles
 typedef enum {
@@ -24,6 +24,8 @@ typedef struct {
     block_t front_block;
     //Bloque onde se atopa o inicio do compoñente léxico
     block_t start_block;
+    //Tamaño lexema
+    int lexsize;
 } sentinel_t;
 
 
