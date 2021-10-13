@@ -46,12 +46,23 @@ typedef enum{
 	QAT_COMMENT
 }_quotes_at_st;
 
+typedef struct{
+	char c;
+	int value;
+}_nested_token_t;
 
+typedef struct{
+	char c1;
+	char c2;
+	int value;
+	_nested_token_t c3;
+} _token_at_t;
 
 typedef struct{
 	char	keyword[KEYWORDSIZE];
 	uint   	value;
 }lexcomp_t;
+
 
 void next_lexcomp();
 

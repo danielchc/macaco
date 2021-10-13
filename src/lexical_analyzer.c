@@ -1,9 +1,28 @@
 #include "lexical_analyzer.h"
 #include "input.h"
 
-
-
 int lines;
+const _token_at_t validTokens[]={
+	{'<','<',_SHIFTL,{'=',_SHTLEQ}},
+	{'>','>',_SHIFTR,{'=',_SHTREQ}},
+	{'*','*',_POW,{'=',_POWEQ}},
+	{'/','/',_FDIV,{'=',_FDIVEQ}},
+	{'-','>',_FUNA,{_NOP}},
+	{'<','=',_LEQ,{_NOP}},
+	{'>','=',_GEQ,{_NOP}},
+	{'=','=',_EQ,{_NOP}},
+	{'!','=',_NEQ,{_NOP}},
+	{'+','=',_ADDEQ,{_NOP}},
+	{'-','=',_SUBEQ,{_NOP}},
+	{'*','=',_MULEQ,{_NOP}},
+	{'/','=',_DIVEQ,{_NOP}},
+	{'%','=',_PEREQ,{_NOP}},
+	{'&','=',_IAND,{_NOP}},
+	{'|','=',_IOR,{_NOP}},
+	{'^','=',_IXOR,{_NOP}},
+};
+
+
 
 char _get_next_char(){
 	char c;
@@ -30,6 +49,9 @@ int _alphanumeric_at(){
 	do{
 		c=_get_next_char();
 	}while(isalnum(c) || c == '_');
+
+	if(c!=EOF) previous_char();
+
 	return 0;
 }
 
@@ -159,41 +181,6 @@ quote_t _quotes_at(){
 }
 
 
-
-/*MOVER ESTO*/
-typedef struct{
-	char c;
-	int value;
-}nested_ta_t;
-
-typedef struct{
-	char c1;
-	char c2;
-	int value;
-	nested_ta_t c3;
-} _token_at_t;
-
-
-const _token_at_t validTokens[]={
-	{'<','<',_SHIFTL,{'=',_SHTLEQ}},
-	{'>','>',_SHIFTR,{'=',_SHTREQ}},
-	{'*','*',_POW,{'=',_POWEQ}},
-	{'/','/',_FDIV,{'=',_FDIVEQ}},
-	{'<','=',_LEQ,{_NOP}},
-	{'>','=',_GEQ,{_NOP}},
-	{'=','=',_EQ,{_NOP}},
-	{'!','=',_NEQ,{_NOP}},
-	{'-','>',_FUNA,{_NOP}},
-	{'+','=',_ADDEQ,{_NOP}},
-	{'-','=',_SUBEQ,{_NOP}},
-	{'*','=',_MULEQ,{_NOP}},
-	{'/','=',_DIVEQ,{_NOP}},
-	{'%','=',_PEREQ,{_NOP}},
-	{'&','=',_IAND,{_NOP}},
-	{'|','=',_IOR,{_NOP}},
-	{'^','=',_IXOR,{_NOP}},
-};
-
 int _token_at(){
 	previous_char();
 	char c1,c2,c3;
@@ -201,7 +188,6 @@ int _token_at(){
 	c2=_get_next_char();
 
 	if(!_is_token(c1)){
-		printf("Tocou\n");
 		return -1;
 	}
 	
@@ -233,7 +219,6 @@ int _token_at(){
 }
 
 
-
 //TODO : Mirar como arreglar detectar cadenas e números EOF
 void next_lexcomp(){
 	char* currentlex;
@@ -243,32 +228,33 @@ void next_lexcomp(){
 	quote_t t2;
 	int tipo;
 
+	int temp=0;
+
 	do{
 		tipo=-1;
 		c = _get_next_char();
 		switch (c){
 			case '0' ... '9':
 				tx=_numeric_at();
+				previous_char();
 				if(tx==NT_ERROR){
 					printf("Error número mal definido\n");
 					return;
 				}
 				tipo=tx==NT_DECIMAL?_DECIMAL:_INTEGER;
 				//printf("TIPO %d",tx);
-				previous_char();
 				break;
 			case 'A' ... 'Z':
 			case 'a' ... 'z':
 			case '_':
 				_alphanumeric_at();
-				previous_char();
 				tipo=_ID;
 				break;
 			case '\"':
 			case '\'':
 				t2=_quotes_at();
 				if(t2==QT_ERROR){
-					printf("Error\n");
+					printf("Error comillas mal definidas\n");
 					return;
 				}
 				tipo=t2==QT_COMMENT?_COMMENT:_STRING;
@@ -301,14 +287,15 @@ void next_lexcomp(){
 			case '>':
 				tipo=_token_at();
 				break;
-			case '.':
-				_dot_at();
-				break;
+			// case '.':
+			// 	_dot_at();
+			// 	break;
 		}
 		currentlex=get_lexcomp();
-		if(currentlex[0]==32 || currentlex[0]=='\n')continue;
+		if(currentlex[0]==32 || currentlex[0]=='\n')tipo=currentlex[0];
 		printf("[%d]\tTipo [%d]\t%s\n",lines,tipo,currentlex);
 		
+
 	}while(c!=EOF);
 	
 }

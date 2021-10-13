@@ -124,8 +124,9 @@ char next_char(){
 	//Se estou no final do bloque, teño que cargar o bloque novo
 	if(*(sentinel.front)==EOF){
 		//Se o final do bloque non está no final 
-		if(sentinel.front!=(sentinel.block[sentinel.front_block]+(BLOCK_SIZE - 1))) 
+		if(sentinel.front!=(sentinel.block[sentinel.front_block]+(BLOCK_SIZE - 1))){
 			return EOF;
+		} 
 		//Alterno de bloque
 		new_block=(sentinel.front_block==BLOCK_A)?BLOCK_B:BLOCK_A;
 
@@ -139,7 +140,7 @@ char next_char(){
 		//Se o lexema é moi grande envio o xestor de rrors
 		if( _lex_size() > BLOCK_SIZE ){
 			printf("O lexema é moi grande\n");
-			return;
+			return -1;
 		}
 
 
@@ -175,9 +176,8 @@ void previous_char(){
 */
 
 void print_block(block_t block){
+	printf("POS D: %p\n",sentinel.front);
 	printf("BLOCK %c[",block==BLOCK_A?'A':'B');
-	printf("%p\n",sentinel.front);
-	printf("%p\n",sentinel.start);
 	char cur;
 	int i;
 	for(i=0;i<BLOCK_SIZE-1;i++){
@@ -186,6 +186,6 @@ void print_block(block_t block){
 		if(cur==10)cur='_';
 		printf("%c,",cur);
 	}
-	printf("]\n");
+	printf("]\n\n");
 }
 

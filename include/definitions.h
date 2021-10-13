@@ -55,8 +55,8 @@
 #define _DIV		47		/*  /  */
 #define _PER		37		/*  %  */
 #define _AT			64		/*  @  */
-#define _AND		38		/*  &  */
-#define _BAR 		124		/*  |  */
+#define _OPAND		38		/*  &  */
+#define _OPOR 		124		/*  |  */
 #define _LT			60		/*  <  */
 #define _GT			62		/*  >  */
 #define _DIA		94		/*  ^  */

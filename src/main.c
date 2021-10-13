@@ -9,8 +9,8 @@
 #include <limits.h>
 
 int main(int argc, char* argv[]){
-	//load_file("test2.txt");
-	load_file("wilcoxon.py");
+	load_file("test.txt");
+	//load_file("wilcoxon.py");
 
 	
 	// char c;

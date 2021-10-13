@@ -32,6 +32,7 @@ int load_block(block_t block);
 char* get_lexcomp();
 char next_char();
 void previous_char();
+char current_char();
 
 
 #endif
