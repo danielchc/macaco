@@ -121,7 +121,6 @@ char next_char(){
 	//Se o lexema é moi grande envio o xestor de errors
 	if( sentinel.lexsize > BLOCK_SIZE ){
 		printf("O lexema é moi grande %d \n",sentinel.lexsize);
-		exit(-1);
 	}
 	//Aumento o punteiro para a seguinte iteracción
 	sentinel.front++;

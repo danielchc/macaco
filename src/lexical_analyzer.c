@@ -1,7 +1,7 @@
 #include "lexical_analyzer.h"
 #include "input.h"
 
-int lines;
+int lines=0;
 const _token_at_t validTokens[]={
 	{'<','<',_SHIFTL,{'=',_SHTLEQ}},
 	{'>','>',_SHIFTR,{'=',_SHTREQ}},
@@ -24,13 +24,6 @@ const _token_at_t validTokens[]={
 
 
 
-char _get_next_char(){
-	char c;
-	c=next_char();
-	if(c=='\n')lines++;
-	return c;
-}
-
 
 int _is_token(char c){
 	return (
@@ -46,7 +39,7 @@ int _alphanumeric_at(){
 	previous_char();
 	char c;
 	do{
-		c=_get_next_char();
+		c=next_char();
 	}while(isalnum(c) || c == '_');
 
 
@@ -56,10 +49,10 @@ int _alphanumeric_at(){
 int _comments_at(){
 	previous_char();
 	char c;
-	c=_get_next_char();
+	c=next_char();
 	if( c!='#' ) return -1;
 	do{
-		c=_get_next_char();
+		c=next_char();
 	}while(c!='\n');
 	return 0;
 }
@@ -130,7 +123,7 @@ numeric_t _numeric_at(){
 				else if(c=='.') state=NAT_DEC;
 				break;
 		}
-		c=_get_next_char();
+		c=next_char();
 		c=tolower(c);
 	}while(c!=EOF);
 	return type;
@@ -142,7 +135,7 @@ quote_t _quotes_at(){
 	char c;
 	_quotes_at_st state=QAT_UNK;
 	do{
-		c=_get_next_char();
+		c=next_char();
 		switch (state){
 			case QAT_UNK:
 				if (c=='\'') state=QAT_SIMPLE_QUOTE;
@@ -183,8 +176,8 @@ quote_t _quotes_at(){
 int _token_at(){
 	previous_char();
 	char c1,c2,c3;
-	c1=_get_next_char();
-	c2=_get_next_char();
+	c1=next_char();
+	c2=next_char();
 
 	if(!_is_token(c1)){
 		return -1;
@@ -201,7 +194,7 @@ int _token_at(){
 			if(validTokens[i].c3.c==_NOP){
 				return validTokens[i].value;
 			}else{
-				c3=_get_next_char();
+				c3=next_char();
 				if(!_is_token(c3)){
 					previous_char();
 					return validTokens[i].value;;
@@ -218,17 +211,15 @@ int _token_at(){
 }
 
 
-//TODO : Mirar como arreglar detectar cadenas e números EOF
 lexcomp_t next_lexcomp(){
 	lexcomp_t currentlex;
-	lines=1;
 	char c;
 	numeric_t tx;
 	quote_t t2;
 	int tipo=-1;
 
 
-	c = _get_next_char();
+	c = next_char();
 	switch (c){
 		case '0' ... '9':
 			tx=_numeric_at();
@@ -287,6 +278,7 @@ lexcomp_t next_lexcomp(){
 			tipo=_EOF;
 			break;		
 		case '\n':
+			lines++;
 			tipo=_NEWLINE;
 			break;
 	}
