@@ -38,23 +38,25 @@ lexcomp_t keywords[]={
 	{"yield",_YIELD}
 };
 
-int init_ts(ts_s* ts){
+ts_s* ts;
+
+int init_ts(){
 	(*ts)=init_hash_table(HASHTABLE_SIZE);
 	return ((*ts)!=NULL);}
 
-void load_keywords(ts_s* ts){
+void load_keywords(){
 	uint i;
 	for(i=0;i<sizeof(keywords)/sizeof(lexcomp_t);i++){
 		set_value(keywords[i].keyword,keywords[i].value,(*ts));}
 	}
 
-void print_ts(ts_s ts){
-	print_hash_table(ts);}
+void print_ts(){
+	print_hash_table(*ts);}
 
-int delete_ts(ts_s* ts){
+int delete_ts(){
 	return delete_hash_table(ts);}
 
-int find_lexcomp(ts_s ts,char* lexcomp){
+int find_lexcomp(char* lexcomp){
 	unsigned int value;
-	return get_value(lexcomp,ts,&value);
+	return get_value(lexcomp,*ts,&value);
 }

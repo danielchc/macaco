@@ -14,10 +14,10 @@
 
 typedef hash_table_t* ts_s;
 
-int init_ts(ts_s* ts);
-void load_keywords(ts_s* ts);
-int find_lexcomp(ts_s ts, char* lexcomp);
-void print_ts(ts_s ts);
-int delete_ts(ts_s* ts);
+int init_ts();
+void load_keywords();
+int find_lexcomp(char* lexcomp);
+void print_ts();
+int delete_ts();
 
 #endif
