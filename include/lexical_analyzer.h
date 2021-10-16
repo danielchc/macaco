@@ -8,6 +8,7 @@
 //Tamaño reservado de palabra clave
 #define KEYWORDSIZE 200
 
+
 typedef enum{
 	NT_ERROR,
 	NT_INTEGER,
@@ -19,6 +20,13 @@ typedef enum{
 	QT_STRING,
 	QT_COMMENT
 }quote_t;
+
+
+typedef enum{
+	AT_UNK,
+	AT_ERROR,
+	AT_OK
+}at_state_t;
 
 
 typedef enum{
