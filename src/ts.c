@@ -57,8 +57,9 @@ void print_ts(){
 }
 
 int delete_ts(){
-	delete_hash_table(ts);
+	int v=delete_hash_table(ts);
 	free(ts);
+	return v;
 }
 
 int find_lexcomp(char* lexcomp){
@@ -70,4 +71,5 @@ int save_lexcomp(char * keyword, unsigned int value){
 	if(find_lexcomp(keyword)==-1){
 		set_value(keyword,value,*ts);
 	}
+	return 0;
 }

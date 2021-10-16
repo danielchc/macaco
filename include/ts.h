@@ -21,5 +21,6 @@ void load_keywords();
 int find_lexcomp(char* lexcomp);
 void print_ts();
 int delete_ts();
+int save_lexcomp(char * keyword, unsigned int value);
 
 #endif
