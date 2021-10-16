@@ -23,8 +23,6 @@ const _token_at_t validTokens[]={
 };
 
 
-
-
 int _is_token(char c){
 	return (
 		(c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == '%') || 	\
@@ -35,6 +33,7 @@ int _is_token(char c){
 	);
 }
 
+//Acabao
 int _alphanumeric_at(){
 	previous_char();
 	char c;
@@ -46,6 +45,7 @@ int _alphanumeric_at(){
 	return 0;
 }
 
+//Acabao
 int _comments_at(){
 	previous_char();
 	char c;
@@ -57,13 +57,13 @@ int _comments_at(){
 	return 0;
 }
 
+//Acabao
 numeric_t _numeric_at(){
 	previous_char();
 	numeric_t type=NT_INTEGER;
 	_numeric_at_st state=NAT_UNK;
 	char c;
 	do{
-		//printf("ACTUAL NUMERICO %c\n",c);
 		switch (state){
 			case NAT_ZEROSTART:
 				if(c=='x') state=NAT_HEX_1;
@@ -131,7 +131,6 @@ numeric_t _numeric_at(){
 
 quote_t _quotes_at(){
 	previous_char();
-	int double_quote=0;
 	char c;
 	_quotes_at_st state=QAT_UNK;
 	do{
@@ -145,25 +144,26 @@ quote_t _quotes_at(){
 				if(c=='\'') return QT_STRING;
 				break;
 			case QAT_DOUBLE_QUOTE_1:
-				if(c=='\"') state=QAT_DOUBLE_QUOTE_2;
-				else state=QAT_CONTENT;
-				break;
-			case QAT_DOUBLE_QUOTE_2:
-				if(c=='\"'){ 
-					state=QAT_COMMENT;
-					double_quote=3;
-				}else {
-					//A cadena vacia recoñecese co fin de liña, polo cal hai que volver un paso atrás
-					previous_char();
-					return QT_STRING;
-				}
-				break;
-			case QAT_COMMENT:
-				if(c=='\"') double_quote--;
-				if(double_quote==0) return QT_COMMENT;
+				if(c=='\"')	state=QAT_DOUBLE_QUOTE_2;
+				else state= QAT_CONTENT;
 				break;
 			case QAT_CONTENT:
-				if(c=='\"') return QT_STRING;
+				if (c=='\"') return QT_STRING;
+				break;
+			case QAT_DOUBLE_QUOTE_2:
+				if(c=='\"') state=QAT_COMMENT;
+				else return QT_STRING;
+				break;
+			case QAT_COMMENT:
+				if(c=='\"') state=QAT_DOUBLE_QUOTE_3;
+				break;
+			case QAT_DOUBLE_QUOTE_3:
+				if(c=='\"') state=QAT_DOUBLE_QUOTE_4;
+				else state=QAT_COMMENT;
+				break;
+			case QAT_DOUBLE_QUOTE_4:
+				if(c=='\"') return QT_COMMENT;
+				else state=QAT_COMMENT;
 				break;
 		}
 		if(c==EOF)break;
