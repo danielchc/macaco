@@ -45,9 +45,8 @@
 #define _DECIMAL		401
 #define _STRING			402
 #define _COMMENT		403
-#define _TERROR			404
 
-
+//Salto de linea e fin de ficheiro
 #define _EOF			    450
 #define _NEWLINE			451
 
@@ -86,6 +85,7 @@
 #define _IOR		515			/*  |=	*/
 #define _IXOR		516			/*  ^=	*/
 
+//Operadores triples
 #define _SHTLEQ		517			/*	>>=	*/    
 #define _SHTREQ		518			/*	<<=	*/    
 #define _POWEQ		519			/*	**=	*/
