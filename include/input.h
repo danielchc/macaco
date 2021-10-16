@@ -28,6 +28,10 @@ typedef struct {
     int lexsize;
 } sentinel_t;
 
+typedef struct{
+    int current_line;
+} stats_s;
+
 
 int load_file(char* filename);
 int load_block(block_t block);
@@ -35,6 +39,7 @@ char* get_lexcomp();
 char next_char();
 void previous_char();
 char current_char();
+int get_current_line();
 
 
 #endif

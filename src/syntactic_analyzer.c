@@ -1,14 +1,23 @@
 #include "syntactic_analyzer.h"
 
 void init_analyze(){
-lexcomp_t lex;
+	lexcomp_t* current_lex=malloc(sizeof(lexcomp_t));
+	char output[200];
+	int line=1;
 	do{
-		lex=next_lexcomp();
-		if(lex.value==_NEWLINE || lex.value==0)continue;
-		printf("Tipo [%d] %s\n",lex.value,lex.keyword);
-	}while(lex.value!=_EOF);
+		if (next_lexcomp(current_lex)!=AT_NOLEX){
+			line=get_current_line();
+			if(current_lex->value==_NEWLINE){
+				strcpy(output,"<NEWLINE>");
+			}else if(current_lex->value==_EOF){
+				strcpy(output,"<EOF>");
+			}else{
+				strcpy(output,current_lex->keyword);
+			}
+			if(current_lex->value==0)continue;
+			printf("LINEA %d ->\tTIPO [%d]\t%s\n",line,current_lex->value,output);
+		};
+		
+	}while(current_lex->value!=_EOF);
 
 }
-    
-//     do{
-// 		tipo=-1;

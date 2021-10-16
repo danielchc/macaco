@@ -25,7 +25,8 @@ typedef enum{
 typedef enum{
 	AT_UNK,
 	AT_ERROR,
-	AT_OK
+	AT_OK,
+	AT_NOLEX
 }at_state_t;
 
 
@@ -74,6 +75,6 @@ typedef struct{
 }lexcomp_t;
 
 
-lexcomp_t next_lexcomp();
+at_state_t next_lexcomp(lexcomp_t* current_lex);
 
 #endif

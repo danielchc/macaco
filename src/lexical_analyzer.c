@@ -1,7 +1,7 @@
 #include "lexical_analyzer.h"
 #include "input.h"
 
-int lines=0;
+
 const _token_at_t validTokens[]={
 	{'<','<',_SHIFTL,{'=',_SHTLEQ}},
 	{'>','>',_SHIFTR,{'=',_SHTREQ}},
@@ -34,14 +34,11 @@ int _is_token(char c){
 }
 
 
-numeric_t _numeric_type(){
-	previous_char();
+numeric_t _numeric_type(char firstChar){
 	_numeric_at_st state=NAT_UNK;
 	numeric_t type=NT_INTEGER;
-	char c;
+	char c=tolower(firstChar);
 	do{
-		c=next_char();
-		c=tolower(c);
 		switch (state){
 			case NAT_ZEROSTART:
 				if(c=='x') state=NAT_HEX_1;
@@ -101,15 +98,16 @@ numeric_t _numeric_type(){
 				else if(c=='.') state=NAT_DEC;
 				break;
 		}
+		c=next_char();
+		c=tolower(c);
 	}while(c!=EOF);
 	return type;
 }
 
-quote_t _quote_type(){
-	char c;
+quote_t _quote_type(char firstChar){
+	char c=firstChar;
 	_quotes_at_st state=QAT_UNK;
 	do{
-		c=next_char();
 		switch (state){
 			case QAT_UNK:
 				if (c=='\'') state=QAT_SIMPLE_QUOTE;
@@ -141,23 +139,26 @@ quote_t _quote_type(){
 				else state=QAT_COMMENT;
 				break;
 		}
-		if(c==EOF)break;
-	}while(1);
+		c=next_char();
+	}while(c!=EOF);
 	return QT_ERROR;
 }
 
-at_state_t _numeric_at(lexcomp_t* lexcomp){
+
+
+at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	//Volvo para atrás para comprobar toda a cadena de novo
 	//Chamo a función para saber que tipo de número é
-	numeric_t type=_numeric_type();
+	numeric_t type=_numeric_type(firstChar);
 	// Se o automáta da algún erro devolvo un erro a función principal
 	if(type==NT_ERROR){
 		printf("errorrrrrrrrrrrr \n");
+		previous_char();
 		return AT_ERROR;
 	} 
 
+
 	previous_char();
-	//
 	// Copio o compoñente léxico a estrucutura
 	strcpy(lexcomp->keyword,get_lexcomp());
 	/*
@@ -172,13 +173,15 @@ at_state_t _numeric_at(lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
-at_state_t _quotes_at(lexcomp_t* lexcomp){
-	//Volvo para atrás para comprobar toda a cadena de novo
-	previous_char();
+at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 	//Chamo a función para saber que tipo de número é
-	quote_t type=_quote_type();
+	quote_t type=_quote_type(firstChar);
 	// Se o automáta da algún erro devolvo un erro a función principal
-	if(type==QT_ERROR) return AT_ERROR;
+	if(type==QT_ERROR){
+		printf("errorrrrrrrrrrrr \n");
+		previous_char();
+		return AT_ERROR;
+	}
 
 	// Copio o compoñente léxico a estrucutura
 	strcpy(lexcomp->keyword,get_lexcomp());
@@ -190,11 +193,8 @@ at_state_t _quotes_at(lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
-
-at_state_t _alphanumeric_at(lexcomp_t* lexcomp){
-	//Volvo para atrás para comprobar toda a cadena de novo
-	previous_char();
-	char c;
+at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
+	char c=firstChar;
 	do{
 		c=next_char();
 	}while(isalnum(c) || c == '_');
@@ -208,18 +208,17 @@ at_state_t _alphanumeric_at(lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
-at_state_t _comments_at(lexcomp_t* lexcomp){
-	//Volvo para atrás para comprobar toda a cadena de novo
-	previous_char();
+at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
 	char c;
-	c=next_char();
 	//Comprobo que o primeiro carácter e un #, senon devolvo erro 
-	if( c!='#' ) return AT_ERROR;
+	if( firstChar!='#' ) return AT_ERROR;
 	//Recorro toda a cadena ata atopar 
 	do{
 		c=next_char();
 	}while(c!='\n');
 
+
+	previous_char();
 	// Copio o compoñente léxico a estrucutura
 	strcpy(lexcomp->keyword,get_lexcomp());
 	//Establezco o tipo de dato na estrucuta
@@ -228,28 +227,23 @@ at_state_t _comments_at(lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
-
-
-at_state_t _token_at(lexcomp_t* lexcomp){
-	previous_char();
-	char c1,c2,c3;
-	c1=next_char();
-	c2=next_char();
-
-	if(!_is_token(c1)) 
+at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){;
+	char c2,c3;
+	if(!_is_token(firstChar)) 
 		return AT_ERROR;
 	
 
+	c2=next_char();
 	if(!_is_token(c2)){
 		previous_char();
 		strcpy(lexcomp->keyword,get_lexcomp());
-		lexcomp->value=c1;
+		lexcomp->value=firstChar;
 		return AT_OK;
 	}
 
 	int i;
 	for(i=0;i<sizeof(validTokens)/sizeof(_token_at_t);i++){
-		if((c1==validTokens[i].c1) && (c2==validTokens[i].c2)){
+		if((firstChar==validTokens[i].c1) && (c2==validTokens[i].c2)){
 			if(validTokens[i].c3.c==_NOP){
 				return validTokens[i].value;
 			}else{
@@ -271,38 +265,51 @@ at_state_t _token_at(lexcomp_t* lexcomp){
 	}
 	previous_char();
 	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=c1;
+	lexcomp->value=firstChar;
 	return AT_OK;
 }
 
-
-lexcomp_t next_lexcomp(){
-	lexcomp_t* currentlex=malloc(sizeof(lexcomp_t));
+at_state_t _dot_at(char firstChar,lexcomp_t* lexcomp){
+	if(firstChar!='.') return AT_ERROR;
 	char c;
+	c=next_char();
+	if(isdigit(c)){
+		return _numeric_at(c,lexcomp);
+	}else{
+		previous_char();
+		strcpy(lexcomp->keyword,get_lexcomp());
+		lexcomp->value=c;
+		return AT_OK;
+	}
 
+}
 
+at_state_t _newline_at(char firstChar,lexcomp_t* lexcomp){
+	if(firstChar!='\n') return AT_ERROR;
+	strcpy(lexcomp->keyword,get_lexcomp());
+	lexcomp->value=_NEWLINE;
+	return AT_OK;
+}
+
+at_state_t next_lexcomp(lexcomp_t* current_lex){
+	char c;
+	at_state_t state=AT_UNK;
 	c = next_char();
-	//printf("PRIMEIRO %c\n",c);
 	switch (c){
 		case '0' ... '9':
-			_numeric_at(currentlex);
+			state=_numeric_at(c,current_lex);
 			break;
 		case 'A' ... 'Z':
 		case 'a' ... 'z':
 		case '_':
-			_alphanumeric_at(currentlex);
+			state=_alphanumeric_at(c,current_lex);
 			break;
 		case '\"':
 		case '\'':
-			_quotes_at(currentlex);
-			// if(t2==QT_ERROR){
-			// 	printf("Error comillas mal definidas\n");
-			// 	return;
-			// }
+			state=_quotes_at(c,current_lex);
 			break;
 		case '#':
-			_comments_at(currentlex);
-			previous_char();
+			state=_comments_at(c,current_lex);
 			break;
 		case '+':
 		case '-':
@@ -326,23 +333,22 @@ lexcomp_t next_lexcomp(){
 		case '=':			
 		case '<': 
 		case '>':
-			_token_at(currentlex);
+			state=_token_at(c,current_lex);
+			break;
+		case '.':
+			state=_dot_at(c,current_lex);
+			break;
+		case '\n':
+			state=_newline_at(c,current_lex);
 			break;
 		case EOF:
-			strcpy(currentlex->keyword,"EOF");
-			currentlex->value=_EOF;
-			get_lexcomp();
-			break;		
-		case '\n':
-			lines++;
-			strcpy(currentlex->keyword,"CR");
-			currentlex->value=_NEWLINE;
-			get_lexcomp();
+			strcpy(current_lex->keyword,get_lexcomp());
+			current_lex->value=_EOF;
 			break;
 		default:
 			get_lexcomp();
+			return AT_NOLEX;
 			break;
 	}
-
-	return *currentlex;
+	return state;
 }

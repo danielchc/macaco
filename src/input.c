@@ -2,46 +2,8 @@
 
 FILE* fp;
 sentinel_t sentinel;
+stats_s stats;
 
-
-/*
-	_get_lexcomp()
-		obtén o último compeñente léxico
-		(f) dianteiro
-		(s) inicio
-		-CASO A: Mesmo bloque
-				            
-		----(s)----------(f)-
-		|  | f | o | r | EOF 
-		-----^---------------
-		Tamaño = (POS(f) - POS(s))
-		- CASO B:Bloques distintos
-				BLOQUE A                BLOQUE B          
-		-------------(f)-----    ----(s)--------------
-		| o | r | t |   | EOF    |  | i | m | p | EOF
-		---------------------    -----^----------------
-		Tamaño = ((INICIO(BLOQUE_B) + TAM(BLOQUE_B))  -  POS(s)) + (POS(f) - INICIO(BLOQUE_A))
-	return:
-		devolve a cadea de texto
-*/
-
-char* get_lexcomp(){
-	//Reservo memoria para o compoñente léxico
-	char* current=malloc(sizeof(char)*BLOCK_SIZE);
-	//Se inicio e dianteiro se atopan no mesmo bloque, copio os bytes que hai entre as dúas posicións de memoria
-	if(sentinel.front_block==sentinel.start_block){
-		memcpy(current,sentinel.start,(sentinel.front-sentinel.start));
-	}else{
-		memcpy(current,sentinel.start,(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start));
-		memcpy(current+(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start),sentinel.block[sentinel.front_block],(sentinel.front -(sentinel.block[sentinel.front_block])));
-	}
-	
-	//Actualizo os punteiros para poder obter o novos compoñentes léxicos
-	sentinel.start=sentinel.front;
-	sentinel.start_block=sentinel.front_block;
-	sentinel.lexsize=0;
-	return current;
-}
 
 
 /*
@@ -69,6 +31,7 @@ int load_file(char* filename){
 	sentinel.start=sentinel.block[BLOCK_A];
 	sentinel.front=sentinel.block[BLOCK_A];
 	sentinel.lexsize=0;
+	stats.current_line=1;
 	return 0;
 }
 
@@ -121,10 +84,13 @@ char next_char(){
 	if( sentinel.lexsize > BLOCK_SIZE ){
 		printf("O lexema é moi grande %d \n",sentinel.lexsize);
 	}
+	
+	//Actualizo para saber o número de liña
+	if(*(sentinel.front-1)=='\n') stats.current_line++;
+
 	//Aumento o punteiro para a seguinte iteracción
 	sentinel.front++;
 	sentinel.lexsize++;
-
 	//Devolvo o carácter actual
 	return *(sentinel.front-1);
 }
@@ -143,6 +109,50 @@ void previous_char(){
 	}
 	//Movome unha posición atrás
 	sentinel.front--;
+}
+
+
+/*
+	get_lexcomp()
+		obtén o último compeñente léxico
+		(f) dianteiro
+		(s) inicio
+		-CASO A: Mesmo bloque
+				            
+		----(s)----------(f)-
+		|  | f | o | r | EOF 
+		-----^---------------
+		Tamaño = (POS(f) - POS(s))
+		- CASO B:Bloques distintos
+				BLOQUE A                BLOQUE B          
+		-------------(f)-----    ----(s)--------------
+		| o | r | t |   | EOF    |  | i | m | p | EOF
+		---------------------    -----^----------------
+		Tamaño = ((INICIO(BLOQUE_B) + TAM(BLOQUE_B))  -  POS(s)) + (POS(f) - INICIO(BLOQUE_A))
+	return:
+		devolve a cadea de texto
+*/
+
+char* get_lexcomp(){
+	//Reservo memoria para o compoñente léxico
+	char* current=malloc(sizeof(char)*BLOCK_SIZE);
+	//Se inicio e dianteiro se atopan no mesmo bloque, copio os bytes que hai entre as dúas posicións de memoria
+	if(sentinel.front_block==sentinel.start_block){
+		memcpy(current,sentinel.start,(sentinel.front-sentinel.start));
+	}else{
+		memcpy(current,sentinel.start,(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start));
+		memcpy(current+(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start),sentinel.block[sentinel.front_block],(sentinel.front -(sentinel.block[sentinel.front_block])));
+	}
+	
+	//Actualizo os punteiros para poder obter o novos compoñentes léxicos
+	sentinel.start=sentinel.front;
+	sentinel.start_block=sentinel.front_block;
+	sentinel.lexsize=0;
+	return current;
+}
+
+int get_current_line(){
+	return stats.current_line;
 }
 
 /*

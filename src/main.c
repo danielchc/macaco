@@ -12,14 +12,17 @@
 
 
 int main(int argc, char* argv[]){
-	//
-
+	char file[200];
 	if(argc==2){
-		load_file(argv[1]);
+		strcpy(file,argv[1]);
 	}else{
-		load_file("wilcoxon.py");
+		strcpy(file,"wilcoxon.py");
 	}
-
+	
+	if(load_file(file)==-1){
+		printf("O arquivo %s non existe\n",file);
+		return -1;
+	};
 	
 	init_analyze();
 	
