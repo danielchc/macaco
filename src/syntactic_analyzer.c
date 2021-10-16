@@ -4,8 +4,8 @@ void init_analyze(){
 lexcomp_t lex;
 	do{
 		lex=next_lexcomp();
-		if(lex.keyword[0]==32 || lex.keyword[0]=='\n')continue;
-		printf("Tipo [%d]\t%s\n ",lex.value,lex.keyword);
+		if(lex.value==_NEWLINE || lex.value==0)continue;
+		printf("Tipo [%d] %s\n",lex.value,lex.keyword);
 	}while(lex.value!=_EOF);
 
 }

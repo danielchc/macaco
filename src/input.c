@@ -26,7 +26,6 @@ sentinel_t sentinel;
 */
 
 char* get_lexcomp(){
-
 	//Reservo memoria para o compoñente léxico
 	char* current=malloc(sizeof(char)*BLOCK_SIZE);
 	//Se inicio e dianteiro se atopan no mesmo bloque, copio os bytes que hai entre as dúas posicións de memoria

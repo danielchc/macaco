@@ -10,12 +10,6 @@
 
 
 
-void print_unescaped(char* ptr) {
-    if (!ptr) return;
-    for (int i = 0; i < sizeof(ptr)/sizeof(char); i++, ptr++) {
-        printf("%c",*ptr);
-    }
-}
 
 int main(int argc, char* argv[]){
 	//
