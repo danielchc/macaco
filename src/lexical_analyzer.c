@@ -1,5 +1,5 @@
 #include "lexical_analyzer.h"
-#include "input.h"
+
 
 
 const _token_at_t validTokens[]={
@@ -303,6 +303,9 @@ at_state_t next_lexcomp(lexcomp_t* current_lex){
 		case 'a' ... 'z':
 		case '_':
 			state=_alphanumeric_at(c,current_lex);
+			if(state==AT_OK){
+				save_lexcomp(current_lex->keyword,current_lex->value);
+			}
 			break;
 		case '\"':
 		case '\'':
@@ -345,6 +348,7 @@ at_state_t next_lexcomp(lexcomp_t* current_lex){
 			strcpy(current_lex->keyword,get_lexcomp());
 			current_lex->value=_EOF;
 			break;
+		case 32:
 		default:
 			get_lexcomp();
 			return AT_NOLEX;

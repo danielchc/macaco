@@ -23,8 +23,18 @@ int main(int argc, char* argv[]){
 		printf("O arquivo %s non existe\n",file);
 		return -1;
 	};
+
+	init_ts();
+	load_keywords();
+
+	printf("Táboa de simbolos antes da execución\n");
+	print_ts();
 	
 	init_analyze();
+
+	printf("Táboa de simbolos despois da execución\n");
+	print_ts();
+	delete_ts();
 	
 	return 0;
 }

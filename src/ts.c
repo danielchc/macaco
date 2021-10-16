@@ -1,5 +1,4 @@
 #include "ts.h"
-#include "lexical_analyzer.h"
 lexcomp_t keywords[]={
 	{"False",_FALSE},
 	{"await",_AWAIT},
@@ -41,22 +40,34 @@ lexcomp_t keywords[]={
 ts_s* ts;
 
 int init_ts(){
+	ts=malloc(sizeof(ts));
 	(*ts)=init_hash_table(HASHTABLE_SIZE);
-	return ((*ts)!=NULL);}
+	return (ts==NULL);
+}
 
 void load_keywords(){
 	uint i;
 	for(i=0;i<sizeof(keywords)/sizeof(lexcomp_t);i++){
-		set_value(keywords[i].keyword,keywords[i].value,(*ts));}
+		set_value(keywords[i].keyword,keywords[i].value,(*ts));
 	}
+}
 
 void print_ts(){
-	print_hash_table(*ts);}
+	print_hash_table(*ts);
+}
 
 int delete_ts(){
-	return delete_hash_table(ts);}
+	delete_hash_table(ts);
+	free(ts);
+}
 
 int find_lexcomp(char* lexcomp){
 	unsigned int value;
 	return get_value(lexcomp,*ts,&value);
+}
+
+int save_lexcomp(char * keyword, unsigned int value){
+	if(find_lexcomp(keyword)==-1){
+		set_value(keyword,value,*ts);
+	}
 }

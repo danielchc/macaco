@@ -7,7 +7,9 @@
 #ifndef HASHTABLE_H
 #include "hashtable.h"
 #endif
-
+#ifndef LEXICAL_ANALYZER_H
+#include "lexical_analyzer.h"
+#endif
 
 #define HASHTABLE_SIZE 37
 

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "input.h"
 #include "definitions.h"
+#include "ts.h"
 
 //Tamaño reservado de palabra clave
 #define KEYWORDSIZE 200
