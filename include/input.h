@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "error_handler.h"
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 50000
+#define BLOCK_SIZE 200
 
 //Bloques disponibles
 typedef enum {

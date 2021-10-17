@@ -144,20 +144,19 @@ quote_t _quote_type(char firstChar){
 	return QT_ERROR;
 }
 
-
-
 at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	//Volvo para atrás para comprobar toda a cadena de novo
 	//Chamo a función para saber que tipo de número é
 	numeric_t type=_numeric_type(firstChar);
 	// Se o automáta da algún erro devolvo un erro a función principal
 	if(type==NT_ERROR){
-		printf("errorrrrrrrrrrrr \n");
+		handle_lexical_error(ERR_NUMERIC);
 		previous_char();
+		get_lexcomp();
 		return AT_ERROR;
 	} 
 
-
+	//Movome o caracter anterior xa que non pertence o lexema
 	previous_char();
 	// Copio o compoñente léxico a estrucutura
 	strcpy(lexcomp->keyword,get_lexcomp());
@@ -178,7 +177,7 @@ at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 	quote_t type=_quote_type(firstChar);
 	// Se o automáta da algún erro devolvo un erro a función principal
 	if(type==QT_ERROR){
-		printf("errorrrrrrrrrrrr \n");
+		handle_lexical_error(ERR_QUOTE);
 		previous_char();
 		return AT_ERROR;
 	}

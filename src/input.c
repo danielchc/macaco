@@ -80,9 +80,12 @@ char next_char(){
 		sentinel.front=sentinel.block[sentinel.front_block];
 	}
 
-	//Se o lexema é moi grande envio o xestor de errors
-	if( sentinel.lexsize > BLOCK_SIZE ){
-		printf("O lexema é moi grande %d \n",sentinel.lexsize);
+	/*
+		Se o lexema é moi grande envio o xestor de errors, comprobo se é igual para evitar
+		que se emita o erro cada vez que colle un caracter novo, 
+	*/
+	if( sentinel.lexsize == BLOCK_SIZE + 1 ){
+		handle_lexical_error(ERR_LEXCOMP_MAX);
 	}
 	
 	//Actualizo para saber o número de liña
@@ -150,6 +153,13 @@ char* get_lexcomp(){
 	sentinel.lexsize=0;
 	return current;
 }
+
+/*
+	get_current_line
+		devolve a liña na que se atopa o centinela
+	return:
+		número de liña actual
+*/
 
 int get_current_line(){
 	return stats.current_line;

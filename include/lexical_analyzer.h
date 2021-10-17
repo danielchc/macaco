@@ -2,8 +2,10 @@
 #define LEXICAL_ANALYZER_H
 #include <ctype.h> 
 #include <stdlib.h>
+#include <stdarg.h>
 #include "input.h"
 #include "definitions.h"
+#include "error_handler.h"
 #include "ts.h"
 
 //Tamaño reservado de palabra clave

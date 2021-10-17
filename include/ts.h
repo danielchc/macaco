@@ -11,9 +11,16 @@
 #include "lexical_analyzer.h"
 #endif
 
+
+/*
+	 Establezco o tamaño incial do hashmap, idealmente un hashmap 
+	 funciona mellor con números primos, como nun inicio hai 35 palabras reservadas, o tamaño 
+	 minimo vai ser 35, ainda que esto é irrelevante xa que na primeira execución vaise ter que 
+	 redimensionar para evitar as colisións
+*/
 #define HASHTABLE_SIZE 37
 
-
+// Defino o tipo táboa de simbolos como un hashmap
 typedef hash_table_t* ts_s;
 
 int init_ts();
