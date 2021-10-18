@@ -98,49 +98,69 @@ numeric_t _numeric_type(char firstChar){
 				else if(c=='.') state=NAT_DEC;
 				break;
 		}
+		//Rompo aqui o bucle para asegurarme de que procesa o EOF
+		if(c==EOF) break;
 		c=next_char();
 		c=tolower(c);
-	}while(c!=EOF);
+	}while(1);
 	return type;
 }
 
 quote_t _quote_type(char firstChar){
+	//Collo o primeiro carácter
 	char c=firstChar;
-	_quotes_at_st state=QAT_UNK;
+	//Establezco o estado do automata o estado inicial
+	_quotes_at_st state=QAT_INITIAL;
 	do{
 		switch (state){
-			case QAT_UNK:
+			case QAT_INITIAL:
+				//Se é unha comilla simple cambio de estado de comillas simples, para intentar buscar texto.
 				if (c=='\'') state=QAT_SIMPLE_QUOTE;
+				//Se é unha comilla doble, cambio de estado para intentar buscar texto ou outra comilla
 				else if (c=='\"') state=QAT_DOUBLE_QUOTE_1;
 				break;
 			case QAT_SIMPLE_QUOTE:
+				//Se é unha comilla simple, continuo lendo caracteres ata atopar unha comilla simple de novo, se atopo devolvo que a cadea é un string. Exemplo 'hola'
 				if(c=='\'') return QT_STRING;
 				break;
 			case QAT_DOUBLE_QUOTE_1:
+				//Se atopo unha doble comilla, significa hai dúas dobles comillas "" (a primeira que atopou no estado QAT_INITIAL e esta)
 				if(c=='\"')	state=QAT_DOUBLE_QUOTE_2;
-				else state= QAT_CONTENT;
+				//Se atopo outra cousa significa que hai texto
+				else state=QAT_CONTENT;
 				break;
 			case QAT_CONTENT:
+				//Busco ata atopar outra comilla que cerre a cadea Exemplo: "hola"
 				if (c=='\"') return QT_STRING;
 				break;
 			case QAT_DOUBLE_QUOTE_2:
+				//Se atopo unha terceira comilla significa que estou nun comentario
 				if(c=='\"') state=QAT_COMMENT;
+				//Se non atopo unha comilla significa que é unha cadea vacia Exemplo:""
 				else return QT_STRING;
 				break;
 			case QAT_COMMENT:
+				//Se atopo unha comilla significa que pode que esté terminando o comentario. Exemplo """hola "
 				if(c=='\"') state=QAT_DOUBLE_QUOTE_3;
 				break;
 			case QAT_DOUBLE_QUOTE_3:
+				//Se atopo outra comilla, significa que casi acabei o comentario. Exemplo: """hola ""
 				if(c=='\"') state=QAT_DOUBLE_QUOTE_4;
+				//Se atopo outra cousa significa que esa comilla non estaba cerrando o comentario,senon que pertencia o contido """hola "Pablo
 				else state=QAT_COMMENT;
 				break;
 			case QAT_DOUBLE_QUOTE_4:
+				//Se atopo outra comilla rematei de cerrar o comentario. Exemplo: """hola """
 				if(c=='\"') return QT_COMMENT;
+				//Se atopo outra cousa significa que o comentario ainda non rematou. """hola "Pablo" que tal
 				else state=QAT_COMMENT;
 				break;
 		}
+		//Rompo o bucle cando me atopo un fin de ficheiro, fagoo aqui para asegurarme que procesa o EOF
+		if(c==EOF) break;
 		c=next_char();
-	}while(c!=EOF);
+	}while(1);
+	//Se chega ata aquí houbo un erro, unha cadea está sen cerrar
 	return QT_ERROR;
 }
 
@@ -150,8 +170,11 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	numeric_t type=_numeric_type(firstChar);
 	// Se o automáta da algún erro devolvo un erro a función principal
 	if(type==NT_ERROR){
+		//Xestiono o error no xestor de erros
 		handle_lexical_error(ERR_NUMERIC);
+		//Volvo para atrás para poder procesar o último carácter
 		previous_char();
+		//Consumo o compeñente léxico para poder ler o seguinte
 		get_lexcomp();
 		return AT_ERROR;
 	} 
@@ -166,9 +189,7 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	*/
 	lexcomp->value=(type==NT_DECIMAL)?_DECIMAL:_INTEGER;
 
-	//printf("GET %s %d\n",lexcomp->keyword,lexcomp->value);
 	// Se chegou ata aquí todo foi ben, entón informo a función principal 
-
 	return AT_OK;
 }
 
@@ -244,7 +265,9 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){;
 	for(i=0;i<sizeof(validTokens)/sizeof(_token_at_t);i++){
 		if((firstChar==validTokens[i].c1) && (c2==validTokens[i].c2)){
 			if(validTokens[i].c3.c==_NOP){
-				return validTokens[i].value;
+				strcpy(lexcomp->keyword,get_lexcomp());
+				lexcomp->value=validTokens[i].value;
+				return AT_OK;
 			}else{
 				c3=next_char();
 				if(!_is_token(c3)){

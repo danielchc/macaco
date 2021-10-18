@@ -50,7 +50,7 @@ typedef enum{
 } _numeric_at_st;
 
 typedef enum{
-	QAT_UNK,
+	QAT_INITIAL,
 	QAT_SIMPLE_QUOTE,
 	QAT_DOUBLE_QUOTE_1,
 	QAT_DOUBLE_QUOTE_2,

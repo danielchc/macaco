@@ -6,7 +6,7 @@
 #include "error_handler.h"
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 200
+#define BLOCK_SIZE 400
 
 //Bloques disponibles
 typedef enum {
