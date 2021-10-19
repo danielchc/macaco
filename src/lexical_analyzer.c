@@ -1,7 +1,17 @@
 #include "lexical_analyzer.h"
 
 
-
+/*
+	OPERADORES VÁLIDOS
+	Explicación dos campos por orde
+	(1) c1-> Primeiro caracter
+	(2) c2-> Segundo caracter
+	(3) ID que lle corresponde a c1c2, por exemplo << correspondelle o identificador _SHIFTL
+	(4) Array co terceiro carácter que pode formar unha expresión de existir
+		- Se pon _NOP, significa que non hai ningún operador c1c2 que teña outro carácter despois
+		- Se ten un simbolo, significa que con ese símbolo, c1c2c3 é un operador que ten como o último parámetro deste array
+		Por exemplo primeiro <<= ten como identificador _SHTLEQ 
+*/
 const _token_at_t validTokens[]={
 	{'<','<',_SHIFTL,{'=',_SHTLEQ}},
 	{'>','>',_SHIFTR,{'=',_SHTREQ}},
@@ -376,44 +386,68 @@ at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
-at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){;
+
+/*
+	_token_at
+		garda o compoñente léxico de un operador ou delimitador procesado na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
+
+at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){
+	// token = operador/delimitador
 	char c2,c3;
+	//Se o primeiro carácter non é un token, devolvo erro
 	if(!_is_token(firstChar)) 
 		return AT_ERROR;
 	
-
+	//Se o segundo carácter é non é un token, é un token simple(1 caracter)
 	c2=next_char();
 	if(!_is_token(c2)){
+		//Volvo para atrás porque o que acabo de detectar non é un token
 		previous_char();
+		//Gardo o valor no compoñente léxico co seu valor ASCII
 		strcpy(lexcomp->keyword,get_lexcomp());
 		lexcomp->value=firstChar;
 		return AT_OK;
 	}
 
+	//Recorro a lista de combinacións posibles
 	int i;
 	for(i=0;i<sizeof(validTokens)/sizeof(_token_at_t);i++){
+		//Se concide o primeiro é o segundo hai dúas opcións
 		if((firstChar==validTokens[i].c1) && (c2==validTokens[i].c2)){
-			if(validTokens[i].c3.c==_NOP){
+
+			/*
+				Se non hai ningunha combinación dos simbolos anteriores cun terceiro ou
+				se o terceiro non é un token
+				entonces recoñecin un token doble. Exemplo +=
+			*/
+			c3=next_char();
+			if(!_is_token(c3) || validTokens[i].c3.c==_NOP){
+				previous_char();
 				strcpy(lexcomp->keyword,get_lexcomp());
 				lexcomp->value=validTokens[i].value;
 				return AT_OK;
-			}else{
-				c3=next_char();
-				if(!_is_token(c3)){
-					previous_char();
-					strcpy(lexcomp->keyword,get_lexcomp());
-					lexcomp->value=validTokens[i].value;
-					return AT_OK;
-				}else{
-					if(validTokens[i].c3.c==c3){
-						strcpy(lexcomp->keyword,get_lexcomp());
-						lexcomp->value=validTokens[i].c3.value;
-						return AT_OK;
-					}
-				}
+			}
+			/*
+				Se existe unha combinación, devolvo o identificador desa combinación.
+				Exemplo <<=
+			*/
+			if(validTokens[i].c3.c==c3){
+				strcpy(lexcomp->keyword,get_lexcomp());
+				lexcomp->value=validTokens[i].c3.value;
+				return AT_OK;
 			}
 		} 
 	}
+
+	//Se chega aqui significa que non é unha combinación válida de tokens, por exemplo "=>", devolve procesa un solo
 	previous_char();
 	strcpy(lexcomp->keyword,get_lexcomp());
 	lexcomp->value=firstChar;

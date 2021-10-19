@@ -1,4 +1,14 @@
-papo
-"hola que tal"
-papo=0b
-papo=3.13
+papo>>papito
+papo>>=papito
+papo**papito
+papo*papito
+papo+=papito
+papo-=papito
+papo/papito
+papo//papito
+papo|=papito
+papo=papito
+papo^=papito
+papo==papito
+papo!=papito
+papo=>papito
