@@ -85,7 +85,7 @@ char next_char(){
 		que se emita o erro cada vez que colle un caracter novo, 
 	*/
 	if( sentinel.lexsize == BLOCK_SIZE + 1 ){
-		handle_lexical_error(ERR_LEXCOMP_MAX);
+		handle_lexical_error(ERR_LEXCOMP_MAX,NULL);
 	}
 	
 	//Actualizo para saber o número de liña

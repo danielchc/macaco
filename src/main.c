@@ -30,14 +30,14 @@ int main(int argc, char* argv[]){
 	load_keywords();
 
 	//Imprimo o estado incial da táboa de simbolos
-	printf("Táboa de simbolos antes da execución\n");
+	printf("Táboa de símbolos antes da execución\n");
 	//print_ts();
 	
 	//Inicio o análise
 	init_analyze();
 
 	//Imprimo o estado final da táboa de simbolos despois do análise
-	printf("Táboa de simbolos despois da execución\n");
+	printf("Táboa de símbolos despois da execución\n");
 	//print_ts();
 	delete_ts();
 

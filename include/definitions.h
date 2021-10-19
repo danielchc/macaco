@@ -49,6 +49,7 @@
 //Salto de linea e fin de ficheiro
 #define _EOF			    450
 #define _NEWLINE			451
+#define _TERROR				452
 
 //Operadores simples
 

@@ -38,7 +38,7 @@ typedef enum{
 
 //Estados autómata números
 typedef enum{
-	NAT_UNK,
+	NAT_INITIAL,
 	NAT_ZEROSTART,
 	NAT_BIN_1,
 	NAT_BIN_2,

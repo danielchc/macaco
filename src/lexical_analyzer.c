@@ -55,7 +55,7 @@ int _is_token(char c){
 
 numeric_t _numeric_type(char firstChar){
 	//Establezco os estados e tipo inicial
-	_numeric_at_st state=NAT_UNK;
+	_numeric_at_st state=NAT_INITIAL;
 	numeric_t type=NT_INTEGER;
 	//Gardo o primeiro cáracter nunha variable para procesar todo o número
 	char c=tolower(firstChar);
@@ -65,75 +65,112 @@ numeric_t _numeric_type(char firstChar){
 			por exemplo esta función non admite números tipo 0b, 0o xa que son tipos incompletos
 		*/
 		switch (state){
-			case NAT_UNK:
+			//Estado inicial
+			case NAT_INITIAL:
+				//Se atopo un 0, pasa o estado para comprobar se é binario/octal/hexadecimal
 				if(c=='0') state=NAT_ZEROSTART;
+				//Se atopo un 1..9, significa que comeza por un número enteiro
 				else if (c>='1'&& c<='9') state=NAT_INT;
+				//Se atopo un punto é un decimal
 				else if(c=='.') state=NAT_DEC;
 				break;
 			case NAT_ZEROSTART:
+				//Comproba que é un número hexadecimal,transiciona o estado
 				if(c=='x') state=NAT_HEX_1;
+				//Comproba que é un número octal,transiciona o estado
 				else if(c=='o') state=NAT_OCT_1;
+				//Comproba que é un número binario,transiciona o estado
 				else if(c=='b') state=NAT_BIN_1;
+				//Comproba que é a cadea ten un "e",e un numero exponencial,transiciona o estado
 				else if(c=='e') state=NAT_EXP;
+				//Se atopo un 1-9, significa que comeza por un número enteiro,transiciona o estado
 				else if (c>='1' && c<='9') state=NAT_INT;
-				else if (c=='.') state=NAT_DEC;
-				else return NT_INTEGER;
+				else if (c=='.') state=NAT_DEC; //Se atopo un punto é un decimal,transiciona o estado
+				else return NT_INTEGER; //Se non atopo nada máis é o enteiro 0
 				break;
 			case NAT_INT:
+				//Se atopo un punto é un decimal,transiciona o estado
 				if (c=='.') state=NAT_DEC;
+				//Comproba que é a cadea ten un "e",e un numero exponencial,transiciona o estado
 				else if (c=='e') state=NAT_EXP_UNSIGNED;
+				//Se atopo unha j, é un número imaxinario
 				else if (c=='j') state=NAT_IMAGINARY;
+				//Se non atopo nada máis é un enteiro
 				else if (!(c>='0' && c<='9') && (c!='_')) return NT_INTEGER;
 				break;
 			case NAT_DEC:
+				//Establezco o estado a decimal porque pasou por este estado
 				type=NT_DECIMAL;
+				//Comproba que é a cadea ten un "e",e un numero exponencial,transiciona o estado
 				if (c=='e') state=NAT_EXP_UNSIGNED;
+				//Se atopo unha j, é un número imaxinario
 				else if (c=='j') state=NAT_IMAGINARY;
+				//Se atopo outra cousa[0-9 ] é un decimal
 				else if(!(c>='0' && c<='9') && (c!='_')) return NT_DECIMAL;
 				break;
 			case NAT_EXP_UNSIGNED:
+				//Se entra aqui significa que é un exponecial, e pode ter ou números 1e9 ou pode ter un simbolo(+/-) ej 1e-(seguinte_estado)
 				if ((c=='-') || (c=='+') || (c>='0' && c<='9')) state=NAT_EXP;
 				break;
 			case NAT_EXP:
+				//Se entra aqui significa que é un exponecial
+				//Se atopo unha j, é un número imaxinario
 				if (c=='j') state=NAT_IMAGINARY;
+				//Aqui atopo os números que se atopan despois da "e" ou dos símbolos(+/-), Exemplo: 10e-12 ou 2e32
 				else if (!(c>='0' && c<='9')) return type;
 				break;
 			case NAT_BIN_1:
+				//Se a cadea acaba como 0b, significa que o número binario está mal formado
 				if (!(c=='0' || c=='1' || c=='_')) return NT_ERROR;
+				//Senon é un binario correcto, transiciono
 				else state=NAT_BIN_2;
 				break;
 			case NAT_BIN_2:
+				//Se atopo 0 e 1, estou ante un número binario correcto, devolvo que é un integer
 				if (!(c=='0' || c=='1' || c=='_')) return NT_INTEGER;
 				break;
 			case NAT_HEX_1:
+				//Se a cadea acaba como 0x, significa que o número hexadecimal está mal formado
 				if (!((c>='0' && c<='9') || (c>='a' && c<='f'))) return NT_ERROR;
+	 			//Senon é un hexadecimal correcto 
 				else state=NAT_HEX_2;
 				break;			
 			case NAT_HEX_2:
+				//Se atopo 0-9 a-f, estou ante un número hexadecimal correcto, devolvo que é un integer
 				if (!((c>='0' && c<='9') || (c>='a' && c<='f'))) return NT_INTEGER;
 				break;
 			case NAT_OCT_1:
+				//Se a cadea acaba como 0o, significa que o número octal está mal formado
 				if (!(c>='0' && c<='7')) return NT_ERROR;
+				//Senon é un octal correcto 
 				else state=NAT_OCT_2;
 				break;			
 			case NAT_OCT_2:
+				//Se atopo 0-7, estou ante un número octal correcto, devolvo que é un integer
 				if (!(c>='0' && c<='7')) return NT_INTEGER;
 				break;
 			case NAT_IMAGINARY:
+				/*
+					Se entra aqui é o que último caracter é un j, devolvo tipo que teño ata agora, 
+					INTEGER ou DECIMAL, dependendo dos estado polos que pasara
+				*/
 				return type;
 				break;
 		}
 		/*
-			Rompo aqui o bucle para asegurarme de que procesa o EOF, debido a que lle paso o primeiro carácter por argumento
-			outra opción menos eficiente de primeiras podería ser mover o punteiro con previous_char	
+			Rompo aqui o bucle para asegurarme de que procesa o EOF, debido a que lle paso o primeiro carácter por argumento teño que poñer o final o next_char
+			e o EOF nunca se chega a procesar
+			Outra opción menos eficiente de primeiras podería ser mover o punteiro con previous_char
+		
+			Se me atopo co final significa atopei o final do ficheiro, devolvo tipo que teño ata agora
 		*/
-		if(c==EOF) break;
+		if(c==EOF) return type;
 		c=next_char();
 		c=tolower(c);
 	}while(1);
+	//Se me atopo co final significa atopei o final do ficheiro, devolvo tipo que teño ata agora. Nunca debería chegar ata aquí
 	return type;
 }
-
 
 /*
 	_quote_type
@@ -145,6 +182,7 @@ numeric_t _numeric_type(char firstChar){
 		QT_STRING: Se se atopou un string
 		QT_COMMENT: Se se atopou un comentario
 */
+
 quote_t _quote_type(char firstChar){
 	//Collo o primeiro carácter
 	char c=firstChar;
@@ -196,10 +234,12 @@ quote_t _quote_type(char firstChar){
 				break;
 		}
 		//Rompo o bucle cando me atopo un fin de ficheiro, fagoo aqui para asegurarme que procesa o EOF
-		if(c==EOF) break;
+		//Se chega o EOF, houbo un erro
+		if(c==EOF) return QT_ERROR;
 		c=next_char();
 	}while(1);
-	//Se chega ata aquí houbo un erro, unha cadea está sen cerrar
+
+	//Se chega aquí houbo un erro. Nunca debería chegar aquí.
 	return QT_ERROR;
 }
 
@@ -215,25 +255,25 @@ quote_t _quote_type(char firstChar){
 		AT_ERROR, 	Se ocorre un erro 
 		AT_OK		Se todo vai ben
 */
+
 at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	//Volvo para atrás para comprobar toda a cadena de novo
 	//Chamo a función para saber que tipo de número é
 	numeric_t type=_numeric_type(firstChar);
-	// Se o autómata da algún erro devolvo un erro a función principal
-	if(type==NT_ERROR){
-		//Xestiono o error no xestor de erros
-		handle_lexical_error(ERR_NUMERIC);
-		//Volvo para atrás para poder procesar o último carácter
-		previous_char();
-		//Consumo o compeñente léxico para poder ler o seguinte
-		get_lexcomp();
-		return AT_ERROR;
-	} 
 
 	//Movome o caracter anterior xa que non pertence o lexema
 	previous_char();
 	// Copio o compoñente léxico a estrucutura
 	strcpy(lexcomp->keyword,get_lexcomp());
+
+	// Se o autómata da algún erro devolvo un erro a función principal
+	if(type==NT_ERROR){
+		lexcomp->value=_TERROR;
+		//Xestiono o error no xestor de erros
+		handle_lexical_error(ERR_NUMERIC,lexcomp->keyword);
+		return AT_ERROR;
+	} 
+
 	/*
 		Se o resultado da función é DECIMAL, garda o tipo decimal na estructura do compoñente léxico, 
 		en caso contrario ten que ser un número enteiro
@@ -244,9 +284,8 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
-
 /*
-	_numeric_at
+	_quotes_at
 		garda o compoñente léxico de cadea de comillas procesado na estructura 
 		de compoñente léxico pasada por referencia no parámetro
 	param:
@@ -256,12 +295,13 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 		AT_ERROR, 	Se ocorre un erro 
 		AT_OK		Se todo vai ben
 */
+
 at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 	//Chamo a función para saber que tipo de número é
 	quote_t type=_quote_type(firstChar);
 	// Se o autómata da algún erro devolvo un erro a función principal
 	if(type==QT_ERROR){
-		handle_lexical_error(ERR_QUOTE);
+		handle_lexical_error(ERR_QUOTE,NULL);
 		previous_char();
 		return AT_ERROR;
 	}
@@ -277,7 +317,7 @@ at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 }
 
 /*
-	_numeric_at
+	_alphanumeric_at
 		garda o compoñente léxico de cadea alfanúmerica procesada na estructura 
 		de compoñente léxico pasada por referencia no parámetro
 	param:
@@ -287,6 +327,7 @@ at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 		AT_ERROR, 	Se ocorre un erro 
 		AT_OK		Se todo vai ben
 */
+
 at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
 	//Obteño o primeiro carácter
 	char c=firstChar;
@@ -305,7 +346,7 @@ at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
 }
 
 /*
-	_numeric_at
+	_comments_at
 		garda o compoñente léxico de un comentario procesado na estructura 
 		de compoñente léxico pasada por referencia no parámetro
 	param:
@@ -315,6 +356,7 @@ at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
 		AT_ERROR, 	Se ocorre un erro 
 		AT_OK		Se todo vai ben
 */
+
 at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
 	char c;
 	//Comprobo que o primeiro carácter e un #, senon devolvo erro 
@@ -378,7 +420,6 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){;
 	return AT_OK;
 }
 
-
 /*
 	_dot_at
 		garda o compoñente léxico dunha cadea que comeza por punto procesada na estructura 
@@ -408,7 +449,6 @@ at_state_t _dot_at(char firstChar,lexcomp_t* lexcomp){
 	//Se chegou ata aqui todo foi ben
 	return AT_OK;
 }
-
 
 /*
 	_newline_at
@@ -446,6 +486,7 @@ at_state_t _newline_at(char firstChar,lexcomp_t* lexcomp){
 		AT_ERROR, 	Se ocorre un erro 
 		AT_OK		Se todo vai ben
 */
+
 at_state_t _eof_at(char firstChar,lexcomp_t* lexcomp){
 	//Se o primeiro carácter non é un o fin do ficheiro devolvo un erro
 	if(firstChar!=EOF) 

@@ -13,7 +13,7 @@ typedef enum{
 }error_t;
 
 void init_error_handler();
-void handle_lexical_error(error_t error);
+void handle_lexical_error(error_t error,char * info);
 void handle_generic_error(char* error,...);
 void print_error_stats();
 

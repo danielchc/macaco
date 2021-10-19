@@ -1,7 +1,7 @@
 #include "ts.h"
 
 //Palabras reservadas cos seus identificadores
-const lexcomp_t keywords[]={
+lexcomp_t keywords[]={
 	{"False",_FALSE},
 	{"await",_AWAIT},
 	{"else",_ELSE},
