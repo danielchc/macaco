@@ -42,9 +42,9 @@
 
 #define _ID				400
 #define _INTEGER		401
-#define _DECIMAL		401
-#define _STRING			402
-#define _COMMENT		403
+#define _DECIMAL		402
+#define _STRING			403
+#define _COMMENT		404
 
 //Salto de linea e fin de ficheiro
 #define _EOF			    450

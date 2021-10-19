@@ -302,8 +302,9 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 		char firstChar: carácter inicial da cadea a procesar
 		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
 	return:
-		AT_ERROR, 	Se ocorre un erro 
-		AT_OK		Se todo vai ben
+		AT_ERROR, 		Se ocorre un erro 
+		AT_OK			Se é un string
+		AT_NOLEX		Se é un comentario
 */
 
 at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
@@ -315,13 +316,15 @@ at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 		previous_char();
 		return AT_ERROR;
 	}
+	if(type==QT_COMMENT){
+		//Se é un comentario consumo e informo de que non é un compoñente léxico
+		get_lexcomp();
+		return AT_NOLEX;
+	}
 
 	// Copio o compoñente léxico a estrucutura
 	strcpy(lexcomp->keyword,get_lexcomp());
-	/*
-		Se o resultado da función é QT_STRING, establezco na estructura que un string, no caso contrario é un comentario
-	*/
-	lexcomp->value=(type==QT_STRING)?_STRING:_COMMENT;
+	lexcomp->value=type;
 	// Se chegou ata aquí todo foi ben, entón informo a función principal 
 	return AT_OK;
 }
@@ -364,7 +367,7 @@ at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
 		lexcomp_t* lexcomp: compoñente léxico procesado
 	return:
 		AT_ERROR, 	Se ocorre un erro 
-		AT_OK		Se todo vai ben
+		AT_NOLEX	Se todo vai ben, xa que non é un compoñente léxico
 */
 
 at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
@@ -378,12 +381,10 @@ at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
 
 
 	previous_char();
-	// Copio o compoñente léxico a estrucutura
-	strcpy(lexcomp->keyword,get_lexcomp());
-	//Establezco o tipo de dato na estrucuta
-	lexcomp->value=_COMMENT;
-	// Se chegou ata aquí todo foi ben, entón informo a función principal
-	return AT_OK;
+	// Consumo o compeñente léxico
+	get_lexcomp();
+	// Se chegou ata aquí todo foi ben recoñeceu o comentario, como é non é un compoñente léxico informo a función principal
+	return AT_NOLEX;
 }
 
 
@@ -417,14 +418,14 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){
 		return AT_OK;
 	}
 
-	//Recorro a lista de combinacións posibles
+	//Recorro a lista de combinacións posibles de dous símbolos
 	int i;
 	for(i=0;i<sizeof(validTokens)/sizeof(_token_at_t);i++){
 		//Se concide o primeiro é o segundo hai dúas opcións
 		if((firstChar==validTokens[i].c1) && (c2==validTokens[i].c2)){
 
 			/*
-				Se non hai ningunha combinación dos simbolos anteriores cun terceiro ou
+				Se non hai ningunha combinación dos símbolos anteriores cun terceiro ou
 				se o terceiro non é un token
 				entonces recoñecin un token doble. Exemplo +=
 			*/
@@ -479,7 +480,7 @@ at_state_t _dot_at(char firstChar,lexcomp_t* lexcomp){
 	//Se non o é garda o punto como un compoñente léxico
 	previous_char();
 	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=c;
+	lexcomp->value=firstChar;
 	//Se chegou ata aqui todo foi ben
 	return AT_OK;
 }
