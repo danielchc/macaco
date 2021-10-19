@@ -12,27 +12,31 @@
 #define KEYWORDSIZE 200
 
 
+//Tipos númericos
 typedef enum{
 	NT_ERROR,
 	NT_INTEGER,
 	NT_DECIMAL,
 }numeric_t;
 
+//Tipos de cadeas que empezan por comilla
 typedef enum{
 	QT_ERROR,
 	QT_STRING,
 	QT_COMMENT
 }quote_t;
 
-
+//Estados do autómata principal
 typedef enum{
-	AT_UNK,
-	AT_ERROR,
-	AT_OK,
-	AT_NOLEX
+	AT_UNK, 	//Descoñecido
+	AT_ERROR, 	//Erro
+	AT_OK,		//Todo vai ben
+	AT_NOLEX	//Non é un compoñente léxico
 }at_state_t;
 
 
+
+//Estados autómata números
 typedef enum{
 	NAT_UNK,
 	NAT_ZEROSTART,
@@ -49,6 +53,7 @@ typedef enum{
 	NAT_IMAGINARY 
 } _numeric_at_st;
 
+//Estados autómata comillas
 typedef enum{
 	QAT_INITIAL,
 	QAT_SIMPLE_QUOTE,
@@ -72,6 +77,8 @@ typedef struct{
 	_nested_token_t c3;
 } _token_at_t;
 
+
+//Estructura dun compoñente léxico
 typedef struct{
 	char	keyword[KEYWORDSIZE];
 	uint   	value;

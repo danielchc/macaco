@@ -1,5 +1,9 @@
 #include "syntactic_analyzer.h"
 
+/*
+	init_analyze
+		inicia o análise léxico
+*/
 void init_analyze(){
 	//Reservo o tamaño do lexema
 	lexcomp_t* current_lex=malloc(sizeof(lexcomp_t));
@@ -22,7 +26,7 @@ void init_analyze(){
 			//Imprimo por pantalla o compoñente lexico
 			printf("LINEA %d ->\tTIPO [%d]\t%s\n",line,current_lex->value,output);
 		};
-		
+	//Executase mentres o compoñente léxico non sexa un EOF
 	}while(current_lex->value!=_EOF);
 
 }

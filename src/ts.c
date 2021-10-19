@@ -1,5 +1,7 @@
 #include "ts.h"
-lexcomp_t keywords[]={
+
+//Palabras reservadas cos seus identificadores
+const lexcomp_t keywords[]={
 	{"False",_FALSE},
 	{"await",_AWAIT},
 	{"else",_ELSE},
@@ -39,12 +41,20 @@ lexcomp_t keywords[]={
 
 ts_s* ts;
 
+/*
+	init_ts
+		inicializa a táboa de símbolos
+*/
 int init_ts(){
 	ts=malloc(sizeof(ts));
 	(*ts)=init_hash_table(HASHTABLE_SIZE);
 	return (ts==NULL);
 }
 
+/*
+	load_keywords
+		carga as palabras reservadas na táboa de simbolos
+*/
 void load_keywords(){
 	uint i;
 	for(i=0;i<sizeof(keywords)/sizeof(lexcomp_t);i++){
@@ -52,24 +62,55 @@ void load_keywords(){
 	}
 }
 
+/*
+	print_ts
+		imprime a táboa de simbolos
+*/
 void print_ts(){
 	print_hash_table(*ts);
 }
 
+/*
+	delete_ts
+		borra a táboa de simbolos
+	return:
+		se da erro -1
+		se non da erro 0
+*/
 int delete_ts(){
 	int v=delete_hash_table(ts);
 	free(ts);
 	return v;
 }
 
+/*
+	find_lexcomp
+		busca un compoñente léxico na táboa de simbolos
+	param:
+		char* lexcomp compoñente léxico a buscar
+	return:
+		se a clave existe devolve 0
+		se a clave non existe -1
+		se a hashtable non existe -2
+*/
 int find_lexcomp(char* lexcomp){
 	unsigned int value;
 	return get_value(lexcomp,*ts,&value);
 }
 
-int save_lexcomp(char * keyword, unsigned int value){
-	if(find_lexcomp(keyword)==-1){
-		set_value(keyword,value,*ts);
+
+/*
+	save_lexcomp
+		comproba se existe un compoñente léxico na táboa de simbolos, senon gardao
+	param:
+		char* lexcomp: 	compoñente léxico a gardar
+		char* value:		valor a gardar
+	return:
+		se todo vai ben devolve 0
+*/
+int save_lexcomp(char * lexcomp, unsigned int value){
+	if(find_lexcomp(lexcomp)==-1){
+		set_value(lexcomp,value,*ts);
 	}
 	return 0;
 }

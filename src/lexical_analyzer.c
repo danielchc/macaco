@@ -22,6 +22,15 @@ const _token_at_t validTokens[]={
 	{'^','=',_IXOR,{_NOP}},
 };
 
+/*
+	_is_token
+		comproba se o carácter pasado por argumento é un delimitador ou operador
+	param:
+		char c: carácter a comprobar que é un delimitador ou operador
+	return:
+		1 sé un delimitador
+		0 se non é un delimitador
+*/
 
 int _is_token(char c){
 	return (
@@ -33,13 +42,34 @@ int _is_token(char c){
 	);
 }
 
+/*
+	_numeric_type
+		devolve o tipo de número dunha cadea a procesar
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+	return:
+		NT_ERROR: Se ocorre un erro
+		NT_INTEGER: Se o número é un enteiro
+		NT_DECIMAL: Se o número é decimal
+*/
 
 numeric_t _numeric_type(char firstChar){
+	//Establezco os estados e tipo inicial
 	_numeric_at_st state=NAT_UNK;
 	numeric_t type=NT_INTEGER;
+	//Gardo o primeiro cáracter nunha variable para procesar todo o número
 	char c=tolower(firstChar);
 	do{
+		/*
+			Neste bucle vou transicionando por diferentes estado ata determinar que tipo de número é, se está ben formado,
+			por exemplo esta función non admite números tipo 0b, 0o xa que son tipos incompletos
+		*/
 		switch (state){
+			case NAT_UNK:
+				if(c=='0') state=NAT_ZEROSTART;
+				else if (c>='1'&& c<='9') state=NAT_INT;
+				else if(c=='.') state=NAT_DEC;
+				break;
 			case NAT_ZEROSTART:
 				if(c=='x') state=NAT_HEX_1;
 				else if(c=='o') state=NAT_OCT_1;
@@ -92,13 +122,11 @@ numeric_t _numeric_type(char firstChar){
 			case NAT_IMAGINARY:
 				return type;
 				break;
-			case NAT_UNK:
-				if(c=='0') state=NAT_ZEROSTART;
-				else if (c>='1'&& c<='9') state=NAT_INT;
-				else if(c=='.') state=NAT_DEC;
-				break;
 		}
-		//Rompo aqui o bucle para asegurarme de que procesa o EOF
+		/*
+			Rompo aqui o bucle para asegurarme de que procesa o EOF, debido a que lle paso o primeiro carácter por argumento
+			outra opción menos eficiente de primeiras podería ser mover o punteiro con previous_char	
+		*/
 		if(c==EOF) break;
 		c=next_char();
 		c=tolower(c);
@@ -106,10 +134,21 @@ numeric_t _numeric_type(char firstChar){
 	return type;
 }
 
+
+/*
+	_quote_type
+		devolve o tipo de cadea de comillas dunha cadea a procesar
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+	return:
+		QT_ERROR: Se ocorre un erro
+		QT_STRING: Se se atopou un string
+		QT_COMMENT: Se se atopou un comentario
+*/
 quote_t _quote_type(char firstChar){
 	//Collo o primeiro carácter
 	char c=firstChar;
-	//Establezco o estado do automata o estado inicial
+	//Establezco o estado do autómata o estado inicial
 	_quotes_at_st state=QAT_INITIAL;
 	do{
 		switch (state){
@@ -164,11 +203,23 @@ quote_t _quote_type(char firstChar){
 	return QT_ERROR;
 }
 
+
+/*
+	_numeric_at
+		garda o compoñente léxico númerico procesado na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
 at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	//Volvo para atrás para comprobar toda a cadena de novo
 	//Chamo a función para saber que tipo de número é
 	numeric_t type=_numeric_type(firstChar);
-	// Se o automáta da algún erro devolvo un erro a función principal
+	// Se o autómata da algún erro devolvo un erro a función principal
 	if(type==NT_ERROR){
 		//Xestiono o error no xestor de erros
 		handle_lexical_error(ERR_NUMERIC);
@@ -193,10 +244,22 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
+
+/*
+	_numeric_at
+		garda o compoñente léxico de cadea de comillas procesado na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
 at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 	//Chamo a función para saber que tipo de número é
 	quote_t type=_quote_type(firstChar);
-	// Se o automáta da algún erro devolvo un erro a función principal
+	// Se o autómata da algún erro devolvo un erro a función principal
 	if(type==QT_ERROR){
 		handle_lexical_error(ERR_QUOTE);
 		previous_char();
@@ -213,8 +276,21 @@ at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
+/*
+	_numeric_at
+		garda o compoñente léxico de cadea alfanúmerica procesada na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
 at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
+	//Obteño o primeiro carácter
 	char c=firstChar;
+	//Recorro todos compoñentes léxicos ata atopar algo que non sexa un carácter alfanúmerico ou unha _
 	do{
 		c=next_char();
 	}while(isalnum(c) || c == '_');
@@ -228,6 +304,17 @@ at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
 	return AT_OK;
 }
 
+/*
+	_numeric_at
+		garda o compoñente léxico de un comentario procesado na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
 at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
 	char c;
 	//Comprobo que o primeiro carácter e un #, senon devolvo erro 
@@ -291,49 +378,124 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){;
 	return AT_OK;
 }
 
+
+/*
+	_dot_at
+		garda o compoñente léxico dunha cadea que comeza por punto procesada na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
+
 at_state_t _dot_at(char firstChar,lexcomp_t* lexcomp){
-	if(firstChar!='.') return AT_ERROR;
+	//Se o primeiro carácter non é un punto devolvo un erro
+	if(firstChar!='.') 
+		return AT_ERROR;
 	char c;
 	c=next_char();
+	//Se o seguinte cáracter o punto é un número procesao no autómata de números
 	if(isdigit(c)){
 		return _numeric_at(c,lexcomp);
-	}else{
-		previous_char();
-		strcpy(lexcomp->keyword,get_lexcomp());
-		lexcomp->value=c;
-		return AT_OK;
 	}
-
-}
-
-at_state_t _newline_at(char firstChar,lexcomp_t* lexcomp){
-	if(firstChar!='\n') return AT_ERROR;
+	//Se non o é garda o punto como un compoñente léxico
+	previous_char();
 	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=_NEWLINE;
+	lexcomp->value=c;
+	//Se chegou ata aqui todo foi ben
 	return AT_OK;
 }
 
+
+/*
+	_newline_at
+		garda o compoñente léxico dun salto de liña  na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
+
+at_state_t _newline_at(char firstChar,lexcomp_t* lexcomp){
+	//Se o primeiro carácter non é un salto de liña devolvo un erro
+	if(firstChar!='\n') 
+		return AT_ERROR;
+
+	//Gardo o compoñente léxico na estructura
+	strcpy(lexcomp->keyword,get_lexcomp());
+	lexcomp->value=_NEWLINE;
+
+	//Se chegou ata aqui todo foi ben
+	return AT_OK;
+}
+
+/*
+	_eof_at
+		garda o compoñente léxico do fin do ficheiro na estructura 
+		de compoñente léxico pasada por referencia no parámetro
+	param:
+		char firstChar: carácter inicial da cadea a procesar
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+*/
+at_state_t _eof_at(char firstChar,lexcomp_t* lexcomp){
+	//Se o primeiro carácter non é un o fin do ficheiro devolvo un erro
+	if(firstChar!=EOF) 
+		return AT_ERROR;
+
+	//Gardo o compoñente léxico na estructura
+	strcpy(lexcomp->keyword,get_lexcomp());
+	lexcomp->value=_EOF;
+	//Se chegou ata aqui todo foi ben
+	return AT_OK;
+}
+
+/*
+	next_lexcomp
+		garda o compoñente léxico na estructura de compoñente léxico pasada por referencia no parámetro
+	param:
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+	return:
+		AT_ERROR, 	Se ocorre un erro 
+		AT_OK		Se todo vai ben
+		AT_NOLEX	Non é un compoñente léxico o último procesado
+*/
+
 at_state_t next_lexcomp(lexcomp_t* current_lex){
 	char c;
+	//Establezco o estado inicial do autómata principal
 	at_state_t state=AT_UNK;
 	c = next_char();
 	switch (c){
+		//Se é un número entra no función para recoñecer números
 		case '0' ... '9':
 			state=_numeric_at(c,current_lex);
 			break;
 		case 'A' ... 'Z':
 		case 'a' ... 'z':
 		case '_':
+			//Se comeza por un carácter alfanumérico é unha cadea alfanumérica
 			state=_alphanumeric_at(c,current_lex);
+			//Se o estado é correcto, gardo na táboa de simbolos como un ID
 			if(state==AT_OK){
 				save_lexcomp(current_lex->keyword,current_lex->value);
 			}
 			break;
 		case '\"':
 		case '\'':
+			//Se comeza por un comilla proceso no función de comillas
 			state=_quotes_at(c,current_lex);
 			break;
 		case '#':
+			//Se comeza por un almohadilla proceso no función de comentarios
 			state=_comments_at(c,current_lex);
 			break;
 		case '+':
@@ -358,20 +520,24 @@ at_state_t next_lexcomp(lexcomp_t* current_lex){
 		case '=':			
 		case '<': 
 		case '>':
+			//Se é un delimitador ou operador proceso no función de tokens
 			state=_token_at(c,current_lex);
 			break;
 		case '.':
+			//Se é un punto proceso na función de puntos
 			state=_dot_at(c,current_lex);
 			break;
 		case '\n':
+			//Se é un salto de liña proceso na función de salto de liña
 			state=_newline_at(c,current_lex);
 			break;
 		case EOF:
-			strcpy(current_lex->keyword,get_lexcomp());
-			current_lex->value=_EOF;
+			//Se é un EOF proceso na función de fin de ficheiro
+			state=_eof_at(c,current_lex);
 			break;
 		case 32:
 		default:
+			//Se non é un compoñente léxico, consume a cadea que leu ata o momento, por exemplo os espacios
 			get_lexcomp();
 			return AT_NOLEX;
 			break;
