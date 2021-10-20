@@ -7,7 +7,7 @@ stats_s stats;
 
 
 /*
-	load_file
+	init_input_system
 		carga un arquivo para lelo, inicializa o primeiro bloque do centinela
 	param:  
 		char* filename nome do arquivo a abrir
@@ -16,7 +16,7 @@ stats_s stats;
 		devolve -1 se hai algún erro
 */
 
-int load_file(char* filename){
+int init_input_system(char* filename){
 	fp=fopen(filename,"r");
 	//Se hai erro devolvo -1
 	if(fp==NULL) return -1;
@@ -35,6 +35,16 @@ int load_file(char* filename){
 	return 0;
 }
 
+/*
+	destroy_input_system
+		cerra o ficheiro e libera a memoria do sistema de entrada
+*/
+
+void destroy_input_system(){
+	fclose(fp);
+	free(sentinel.block[BLOCK_A]);
+	free(sentinel.block[BLOCK_B]);
+}
 /*
 	load_block
 		carga un bloque dun arquivo, no último carácter pon un fin de ficheiro
@@ -139,11 +149,16 @@ void previous_char(){
 */
 
 char* get_lexcomp(){
-	//Reservo memoria para o compoñente léxico
-	char* current=malloc(sizeof(char)*BLOCK_SIZE);
+	char* current;
 	//Se inicio e dianteiro se atopan no mesmo bloque, copio os bytes que hai entre as dúas posicións de memoria
+
+	//Reservo memoria para o compoñente actual
+	current=calloc(sentinel.lexsize+2,sizeof(char));;
+
+	//Se están no mesmo bloque copio directamente
 	if(sentinel.front_block==sentinel.start_block){
 		memcpy(current,sentinel.start,(sentinel.front-sentinel.start));
+	//Se están en bloques distintos copio un trozo de cada bloque
 	}else{
 		memcpy(current,sentinel.start,(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start));
 		memcpy(current+(((sentinel.block[sentinel.start_block])+BLOCK_SIZE-1)-sentinel.start),sentinel.block[sentinel.front_block],(sentinel.front -(sentinel.block[sentinel.front_block])));

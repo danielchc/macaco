@@ -29,5 +29,6 @@ void init_analyze(){
 		if(current_state==AT_OK) printf("LINEA %d ->\tTIPO [%d]\t%s\n",line,current_lex->value,output);
 	//Executase mentres o compoñente léxico non sexa un EOF
 	}while(current_lex->value!=_EOF);
-
+	//Libero a memoria que corresponde o compoñente léxico
+	free(current_lex);
 }

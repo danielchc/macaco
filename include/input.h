@@ -6,7 +6,7 @@
 #include "error_handler.h"
 
 //Tamaño de cada bloque
-#define BLOCK_SIZE 400
+#define BLOCK_SIZE 200
 
 //Bloques disponibles
 typedef enum {
@@ -34,7 +34,8 @@ typedef struct{
 } stats_s;
 
 
-int load_file(char* filename);
+int init_input_system(char* filename);
+void destroy_input_system();
 int load_block(block_t block);
 char* get_lexcomp();
 char next_char();

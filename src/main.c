@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
 	strcpy(file,(argc==2)?argv[1]:"wilcoxon.py");
 	
 	//Cargo o ficheiro, se se produce un erro mando o xestor de erros
-	if(load_file(file)==-1){
+	if(init_input_system(file)==-1){
 		handle_generic_error("O arquivo %s non existe",file);
 		return -1;
 	};
@@ -31,15 +31,16 @@ int main(int argc, char* argv[]){
 
 	//Imprimo o estado incial da táboa de simbolos
 	printf("Táboa de símbolos antes da execución\n");
-	print_ts();
+	//print_ts();
 	
 	//Inicio o análise
 	init_analyze();
 
 	//Imprimo o estado final da táboa de simbolos despois do análise
 	printf("Táboa de símbolos despois da execución\n");
-	print_ts();
+	//print_ts();
 	delete_ts();
+	destroy_input_system();
 
 	//Imprimo as estadisticas de erros
 	print_error_stats();

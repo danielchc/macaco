@@ -33,6 +33,30 @@ const _token_at_t validTokens[]={
 };
 
 /*
+	_recover_lexcomp
+		garda o compoñente léxico  procesado na estructura de compoñente léxico pasada por referencia no parámetro e libera a memoria
+	param:
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+*/
+void _recover_lexcomp(lexcomp_t* lexcomp, int id){
+	char* lex=get_lexcomp();
+	strcpy(lexcomp->keyword,lex);
+	lexcomp->value=id;
+	free(lex);
+}
+
+/*
+	_consume_lexcomp
+		ignora o compoñente léxico e libera a memoria
+	param:
+		lexcomp_t* lexcomp: compoñente léxico procesado (punteiro a estructura para gardar os datos)
+*/
+void _consume_lexcomp(){
+	char* lex=get_lexcomp();
+	free(lex);
+}
+
+/*
 	_is_token
 		comproba se o carácter pasado por argumento é un delimitador ou operador
 	param:
@@ -41,6 +65,7 @@ const _token_at_t validTokens[]={
 		1 sé un delimitador
 		0 se non é un delimitador
 */
+
 
 int _is_token(char c){
 	return (
@@ -273,8 +298,13 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 
 	//Movome o caracter anterior xa que non pertence o lexema
 	previous_char();
-	// Copio o compoñente léxico a estrucutura
-	strcpy(lexcomp->keyword,get_lexcomp());
+
+	/*
+		Copio o compoñente léxico a estrucutura
+		Se o resultado da función é DECIMAL, garda o tipo decimal na estructura do compoñente léxico, 
+		en caso contrario ten que ser un número enteiro
+	*/
+	_recover_lexcomp(lexcomp,(type==NT_DECIMAL)?_DECIMAL:_INTEGER);
 
 	// Se o autómata da algún erro devolvo un erro a función principal
 	if(type==NT_ERROR){
@@ -283,13 +313,7 @@ at_state_t _numeric_at(char firstChar,lexcomp_t* lexcomp){
 		handle_lexical_error(ERR_NUMERIC,lexcomp->keyword);
 		return AT_ERROR;
 	} 
-
-	/*
-		Se o resultado da función é DECIMAL, garda o tipo decimal na estructura do compoñente léxico, 
-		en caso contrario ten que ser un número enteiro
-	*/
-	lexcomp->value=(type==NT_DECIMAL)?_DECIMAL:_INTEGER;
-
+	
 	// Se chegou ata aquí todo foi ben, entón informo a función principal 
 	return AT_OK;
 }
@@ -316,15 +340,10 @@ at_state_t _quotes_at(char firstChar,lexcomp_t* lexcomp){
 		previous_char();
 		return AT_ERROR;
 	}
-	if(type==QT_COMMENT){
-		//Se é un comentario consumo e informo de que non é un compoñente léxico
-		get_lexcomp();
-		return AT_NOLEX;
-	}
 
 	// Copio o compoñente léxico a estrucutura
-	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=type;
+	_recover_lexcomp(lexcomp,(type==QT_COMMENT)?_COMMENT:_STRING);
+
 	// Se chegou ata aquí todo foi ben, entón informo a función principal 
 	return AT_OK;
 }
@@ -351,9 +370,7 @@ at_state_t _alphanumeric_at(char firstChar,lexcomp_t* lexcomp){
 
 	previous_char();
 	// Copio o compoñente léxico a estrucutura
-	strcpy(lexcomp->keyword,get_lexcomp());
-	//Establezco o tipo de dato na estrucuta
-	lexcomp->value=_ID;
+	_recover_lexcomp(lexcomp,_ID);
 	// Se chegou ata aquí todo foi ben, entón informo a función principal
 	return AT_OK;
 }
@@ -381,8 +398,8 @@ at_state_t _comments_at(char firstChar,lexcomp_t* lexcomp){
 
 
 	previous_char();
-	// Consumo o compeñente léxico
-	get_lexcomp();
+	// Consumo o resultado da función xa que non é un compoñente léxico
+	_consume_lexcomp();
 	// Se chegou ata aquí todo foi ben recoñeceu o comentario, como é non é un compoñente léxico informo a función principal
 	return AT_NOLEX;
 }
@@ -413,8 +430,7 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){
 		//Volvo para atrás porque o que acabo de detectar non é un token
 		previous_char();
 		//Gardo o valor no compoñente léxico co seu valor ASCII
-		strcpy(lexcomp->keyword,get_lexcomp());
-		lexcomp->value=firstChar;
+		_recover_lexcomp(lexcomp,firstChar);
 		return AT_OK;
 	}
 
@@ -432,8 +448,7 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){
 			c3=next_char();
 			if(!_is_token(c3) || validTokens[i].c3.c==_NOP){
 				previous_char();
-				strcpy(lexcomp->keyword,get_lexcomp());
-				lexcomp->value=validTokens[i].value;
+				_recover_lexcomp(lexcomp,validTokens[i].value);
 				return AT_OK;
 			}
 			/*
@@ -441,8 +456,7 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){
 				Exemplo <<=
 			*/
 			if(validTokens[i].c3.c==c3){
-				strcpy(lexcomp->keyword,get_lexcomp());
-				lexcomp->value=validTokens[i].c3.value;
+				_recover_lexcomp(lexcomp,validTokens[i].c3.value);
 				return AT_OK;
 			}
 		} 
@@ -450,8 +464,7 @@ at_state_t _token_at(char firstChar,lexcomp_t* lexcomp){
 
 	//Se chega aqui significa que non é unha combinación válida de tokens, por exemplo "=>", devolve procesa un solo
 	previous_char();
-	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=firstChar;
+	_recover_lexcomp(lexcomp,firstChar);
 	return AT_OK;
 }
 
@@ -479,8 +492,7 @@ at_state_t _dot_at(char firstChar,lexcomp_t* lexcomp){
 	}
 	//Se non o é garda o punto como un compoñente léxico
 	previous_char();
-	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=firstChar;
+	_recover_lexcomp(lexcomp,firstChar);
 	//Se chegou ata aqui todo foi ben
 	return AT_OK;
 }
@@ -503,8 +515,7 @@ at_state_t _newline_at(char firstChar,lexcomp_t* lexcomp){
 		return AT_ERROR;
 
 	//Gardo o compoñente léxico na estructura
-	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=_NEWLINE;
+	_recover_lexcomp(lexcomp,_NEWLINE);
 
 	//Se chegou ata aqui todo foi ben
 	return AT_OK;
@@ -528,8 +539,7 @@ at_state_t _eof_at(char firstChar,lexcomp_t* lexcomp){
 		return AT_ERROR;
 
 	//Gardo o compoñente léxico na estructura
-	strcpy(lexcomp->keyword,get_lexcomp());
-	lexcomp->value=_EOF;
+	_recover_lexcomp(lexcomp,_EOF);
 	//Se chegou ata aqui todo foi ben
 	return AT_OK;
 }
@@ -614,7 +624,7 @@ at_state_t next_lexcomp(lexcomp_t* current_lex){
 		case 32:
 		default:
 			//Se non é un compoñente léxico, consume a cadea que leu ata o momento, por exemplo os espacios
-			get_lexcomp();
+			_consume_lexcomp();
 			return AT_NOLEX;
 			break;
 	}
