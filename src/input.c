@@ -25,7 +25,7 @@ int load_file(char* filename){
 	sentinel.block[BLOCK_B]=malloc(sizeof(char)*BLOCK_SIZE);
 	//Cargo o primeiro bloque
 	load_block(BLOCK_A);
-	//Establezco as posicións dos punteiros en 
+	//Establezco as posicións dos punteiros no bloque A 
 	sentinel.front_block=BLOCK_A;
 	sentinel.start_block=BLOCK_A;
 	sentinel.start=sentinel.block[BLOCK_A];
@@ -84,12 +84,14 @@ char next_char(){
 		Se o lexema é moi grande envio o xestor de errors, comprobo se é igual para evitar
 		que se emita o erro cada vez que colle un caracter novo, 
 	*/
-	if( sentinel.lexsize == BLOCK_SIZE + 1 ){
+	if( sentinel.lexsize == BLOCK_SIZE ){
 		handle_lexical_error(ERR_LEXCOMP_MAX,NULL);
 	}
 	
 	//Actualizo para saber o número de liña
-	if(*(sentinel.front-1)=='\n') stats.current_line++;
+	if(*(sentinel.front-1)=='\n'){
+		stats.current_line++;
+	}
 
 	//Aumento o punteiro para a seguinte iteracción
 	sentinel.front++;

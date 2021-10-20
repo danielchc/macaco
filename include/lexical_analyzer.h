@@ -65,11 +65,13 @@ typedef enum{
 	QAT_COMMENT
 }_quotes_at_st;
 
+//Operador con tres símbolos
 typedef struct{
 	char c;
 	int value;
 }_nested_token_t;
 
+//Estructura de operadores compostos(explicado no arquivo lexical_analycer.c)
 typedef struct{
 	char c1;
 	char c2;

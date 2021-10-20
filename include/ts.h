@@ -18,6 +18,7 @@
 	 minimo vai ser 35, ainda que esto é irrelevante xa que na primeira execución vaise ter que 
 	 redimensionar para evitar as colisións
 */
+
 #define HASHTABLE_SIZE 37
 
 // Defino o tipo táboa de simbolos como un hashmap

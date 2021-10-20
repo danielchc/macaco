@@ -6,9 +6,13 @@
 #include <stdarg.h>
 #include "input.h"
 
+//Tipos de erros recoñecidos
 typedef enum{
+	//Erro númerico
 	ERR_NUMERIC,
+	//Erro cadea de comillas sen cerrar
 	ERR_QUOTE,
+	//Compoñente demasiado grande
 	ERR_LEXCOMP_MAX
 }error_t;
 

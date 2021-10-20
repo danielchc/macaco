@@ -55,21 +55,21 @@ ht_size_t get_next_prime(ht_size_t n){
 hash_table_t* init_hash_table(ht_size_t table_size){
 	if(table_size == 0)return NULL;
 	
-	//reservo memoria para a hash_table
+	//Reservo memoria para a hash_table
 	hash_table_t* hash_table_new = (hash_table_t*)malloc(sizeof(hash_table_t));
 	
 	if(!hash_table_new)return NULL;
 
-	//reservo memoria para as listas enlazadas
+	//Reservo memoria para as listas enlazadas
 	hash_table_new->lists = (record_t**)calloc(table_size, sizeof(record_t*));
 
 	if(!(hash_table_new->lists))return NULL;
 
-	//establezco o tamaño inicial da táboa
+	//Establezco o tamaño inicial da táboa
 	hash_table_new->table_size = table_size;
 	hash_table_new->num_records = 0;
 	
-	//devolvo a nova táboa    
+	//Devolvo a nova táboa    
 	return hash_table_new; 
 }
 
@@ -111,7 +111,7 @@ int resize_hash_table(hash_table_t* hash_table){
 	if(!hash_table || !(hash_table->lists))return -1;
 	ht_size_t new_size = get_next_prime((hash_table->table_size << 1));
 	
-	//reservo a nova memoria
+	//Reservo a nova memoria
 	record_t** larger_table = (record_t**)calloc(new_size, sizeof(record_t*));
 
 	if(!larger_table) return -1;
@@ -123,9 +123,9 @@ int resize_hash_table(hash_table_t* hash_table){
 	record_t* current = NULL;
 	ht_size_t table_index = 0;
 	 
-	//recorro a táboa orixinal
+	//Recorro a táboa orixinal
 	for(; i < size; ++i){
-		//movo os rexistros dunha táboa a outra
+		//Movo os rexistros dunha táboa a outra
 		current_list = (hash_table->lists)[i];
 		while(current_list){
 			current=remove_front(&current_list);
@@ -135,7 +135,7 @@ int resize_hash_table(hash_table_t* hash_table){
 			larger_table[table_index] = to_transfer;
 		}
 	}
-	//libero a nova táboa
+	//Libero a nova táboa
 	free(hash_table->lists);
 	
 	//Establezco os novos tamaños do array
@@ -177,7 +177,7 @@ record_t* set_value(char* key, ht_value_t value, hash_table_t* hash_table){
 		link_ptr = &(*link_ptr)->next_link;
 	}
 
-	//se non existe engade un novo reixstro
+	//Se non existe engade un novo rexistro
 	if(!(*link_ptr)){
 		//Comproba se é necesario facer máis grande a táboa
 		if((hash_table->num_records + 1) > (hash_table->table_size)*(DEFAULTMAXLOAD)){
@@ -187,7 +187,7 @@ record_t* set_value(char* key, ht_value_t value, hash_table_t* hash_table){
 			table_index = hash_val%(hash_table->table_size);
 		}
 
-		//engade o novo rexistro a lista enlazada
+		//Engade o novo rexistro a lista enlazada
 		record_t* new_record = NULL;
 		if(!(new_record = add_front(key, value, &(hash_table->lists[table_index]))))return NULL;
 		
@@ -196,7 +196,7 @@ record_t* set_value(char* key, ht_value_t value, hash_table_t* hash_table){
 		return new_record;
 		
 	}else{
-		//se xa existe a clave reemplaza o valor
+		//Se xa existe a clave reemplaza o valor
 		(*link_ptr)->value = value;
 		return *link_ptr;
 	}
@@ -309,13 +309,13 @@ int clear_hash_table(hash_table_t* hash_table){
 
 	if(!hash_table || !(hash_table->lists))return -1;
 	
-	//para cada elemento borra a lista asociada
+	//Para cada elemento borra a lista asociada
 	ht_size_t size = hash_table->table_size;
 	ht_size_t i = 0;
 	for(; i < size; ++i){
 		delete_list(&(hash_table->lists[i]));
 	}
-	//elimina a memoria das listas
+	//Elimina a memoria das listas
 	free(hash_table->lists);
 	hash_table->lists = NULL;
 
