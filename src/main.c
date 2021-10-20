@@ -31,15 +31,19 @@ int main(int argc, char* argv[]){
 
 	//Imprimo o estado incial da táboa de simbolos
 	printf("Táboa de símbolos antes da execución\n");
-	//print_ts();
+	print_ts();
 	
 	//Inicio o análise
 	init_analyze();
 
 	//Imprimo o estado final da táboa de simbolos despois do análise
 	printf("Táboa de símbolos despois da execución\n");
-	//print_ts();
+	print_ts();
+
+	//Borro a táboa de simbolos
 	delete_ts();
+	
+	//Cerro o arquivo e libero a memoria
 	destroy_input_system();
 
 	//Imprimo as estadisticas de erros
