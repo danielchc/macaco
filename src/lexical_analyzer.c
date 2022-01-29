@@ -91,7 +91,6 @@ int _is_token(char c){
 numeric_t _numeric_type(char firstChar){
 	//Establezco os estados e tipo inicial
 	_numeric_at_st state=NAT_INITIAL;
-	numeric_t type=NT_INTEGER;
 	//Gardo o primeiro cáracter nunha variable para procesar todo o número
 	char c=tolower(firstChar);
 	do{
@@ -135,7 +134,6 @@ numeric_t _numeric_type(char firstChar){
 				break;
 			case NAT_DEC:
 				//Establezco o estado a decimal porque pasou por este estado
-				type=NT_DECIMAL;
 				//Comproba que é a cadea ten un "e",e un numero exponencial,transiciona o estado
 				if (c=='e') state=NAT_EXP_UNSIGNED;
 				//Se atopo unha j, é un número imaxinario
@@ -152,7 +150,7 @@ numeric_t _numeric_type(char firstChar){
 				//Se atopo unha j, é un número imaxinario
 				if (c=='j') state=NAT_IMAGINARY;
 				//Aqui atopo os números que se atopan despois da "e" ou dos símbolos(+/-), Exemplo: 10e-12 ou 2e32
-				else if (!(c>='0' && c<='9')) return type;
+				else if (!(c>='0' && c<='9')) return NT_DECIMAL;
 				break;
 			case NAT_BIN_1:
 				//Se a cadea acaba como 0b, significa que o número binario está mal formado
@@ -189,7 +187,7 @@ numeric_t _numeric_type(char firstChar){
 					Se entra aqui é o que último caracter é un j, devolvo tipo que teño ata agora, 
 					INTEGER ou DECIMAL, dependendo dos estado polos que pasara
 				*/
-				return type;
+				return NT_DECIMAL;
 				break;
 		}
 		/*
@@ -199,12 +197,12 @@ numeric_t _numeric_type(char firstChar){
 		
 			Se me atopo co final significa atopei o final do ficheiro, devolvo tipo que teño ata agora
 		*/
-		if(c==EOF) return type;
+		if(c==EOF) return NT_INTEGER;
 		c=next_char();
 		c=tolower(c);
 	}while(1);
 	//Se me atopo co final significa atopei o final do ficheiro, devolvo tipo que teño ata agora. Nunca debería chegar ata aquí
-	return type;
+	return NT_INTEGER;
 }
 
 /*

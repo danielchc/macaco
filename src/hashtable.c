@@ -75,7 +75,7 @@ hash_table_t* init_hash_table(ht_size_t table_size){
 
 /*
 	hash_function
-		xera un índice baseado na clave dada para calcular o indice empregase (hash_val% table_size)
+		xera un índice baseado na clave dada para calcular o indice empregase (hash_val%table_size)
 	param:
 		char* key chave da que queremos xerar o hash
 	return:
