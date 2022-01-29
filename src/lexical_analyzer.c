@@ -570,10 +570,8 @@ at_state_t next_lexcomp(lexcomp_t* current_lex){
 		case '_':
 			//Se comeza por un carácter alfanumérico é unha cadea alfanumérica
 			state=_alphanumeric_at(c,current_lex);
-			//Se o estado é correcto, gardo na táboa de simbolos como un ID
-			if(state==AT_OK){
-				save_lexcomp(current_lex->keyword,current_lex->value);
-			}
+			//Se o estado é correcto, gardo na táboa de simbolos
+			if(state==AT_OK) save_lexcomp(current_lex->keyword,&(current_lex->value));
 			break;
 		case '\"':
 		case '\'':

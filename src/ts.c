@@ -84,7 +84,7 @@ int delete_ts(){
 }
 
 /*
-	find_lexcomp
+	get_lexcomp
 		busca un compoñente léxico na táboa de simbolos
 	param:
 		char* lexcomp compoñente léxico a buscar
@@ -93,9 +93,8 @@ int delete_ts(){
 		se a clave non existe -1
 		se a hashtable non existe -2
 */
-int find_lexcomp(char* lexcomp){
-	unsigned int value;
-	return get_value(lexcomp,*ts,&value);
+unsigned int _get_lexcomp(char* lexcomp, unsigned int* value){
+	return get_value(lexcomp,*ts,value);
 }
 
 
@@ -104,13 +103,13 @@ int find_lexcomp(char* lexcomp){
 		comproba se existe un compoñente léxico na táboa de simbolos, senon gardao
 	param:
 		char* lexcomp: 	compoñente léxico a gardar
-		char* value:		valor a gardar
+		int* value:		valor a gardar
 	return:
 		se todo vai ben devolve 0
 */
-int save_lexcomp(char * lexcomp, unsigned int value){
-	if(find_lexcomp(lexcomp)==-1){
-		set_value(lexcomp,value,*ts);
-	}
+int save_lexcomp(char* lexcomp, unsigned int *value){
+	if(_get_lexcomp(lexcomp, value)==-1){
+		set_value(lexcomp,*value,*ts);
+	};
 	return 0;
 }
