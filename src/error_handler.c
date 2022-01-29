@@ -36,7 +36,7 @@ void handle_lexical_error(error_t error,char * info){
 			break;
 	}
 	if(info)strcat(msg,info);
-	printf("\033[1;31mLÍNEA %d\t->\t%s\033[0m\n",get_current_line(),msg);
+	printf("\033[1;31m\t%s\033[0m\n",msg);
 	error_count++;
 }
 

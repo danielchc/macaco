@@ -2,7 +2,6 @@
 
 FILE* fp;
 sentinel_t sentinel;
-stats_s stats;
 
 
 
@@ -31,7 +30,6 @@ int init_input_system(char* filename){
 	sentinel.start=sentinel.block[BLOCK_A];
 	sentinel.front=sentinel.block[BLOCK_A];
 	sentinel.lexsize=0;
-	stats.current_line=1;
 	return 0;
 }
 
@@ -96,11 +94,6 @@ char next_char(){
 	*/
 	if( sentinel.lexsize == BLOCK_SIZE ){
 		handle_lexical_error(ERR_LEXCOMP_MAX,NULL);
-	}
-	
-	//Actualizo para saber o número de liña
-	if(*(sentinel.front-1)=='\n'){
-		stats.current_line++;
 	}
 
 	//Aumento o punteiro para a seguinte iteracción
@@ -169,17 +162,6 @@ char* get_lexcomp(){
 	sentinel.start_block=sentinel.front_block;
 	sentinel.lexsize=0;
 	return current;
-}
-
-/*
-	get_current_line
-		devolve a liña na que se atopa o centinela
-	return:
-		número de liña actual
-*/
-
-int get_current_line(){
-	return stats.current_line;
 }
 
 /*

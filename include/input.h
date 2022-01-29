@@ -29,10 +29,6 @@ typedef struct {
     int lexsize;
 } sentinel_t;
 
-typedef struct{
-    int current_line;
-} stats_s;
-
 
 int init_input_system(char* filename);
 void destroy_input_system();
@@ -41,7 +37,6 @@ char* get_lexcomp();
 char next_char();
 void previous_char();
 char current_char();
-int get_current_line();
 
 
 
