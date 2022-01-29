@@ -282,16 +282,18 @@ int print_hash_table(hash_table_t* hash_table){
 	ht_size_t i = 0;
 	size_t size = hash_table->table_size;
 	for(; i < size; ++i){
-		printf("POSICIÓN %u:", i);
-		printf("{");
+
 		if(hash_table->lists[i]){
+			printf("POSICIÓN %u:", i);
+			printf("{");
 			record_t* head=hash_table->lists[i];
 			while(head){   
 				printf("[CLAVE: %s, VALOR: %u]", head->key, head->value);
 				head = head->next_link; 
 			}
+			printf("%s\n", "}");
 		}
-		printf("%s\n", "}");
+
 	}
 
 	return 0;
